@@ -1,0 +1,6 @@
+@Api.AppDoar_HostAddress = http://localhost:5268
+
+GET {{Api.AppDoar_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
