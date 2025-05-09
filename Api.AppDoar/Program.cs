@@ -14,8 +14,28 @@ namespace Api.AppDoar
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Força o ASP.NET a sempre gerar as URLs minúsculas
+            builder.Services.AddRouting(options =>
+            {
+                options.LowercaseUrls = true;
+            });
+
+
+            // Permitindo o acesso do localhost:3000
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
             var app = builder.Build();
+
+            app.UseCors("CorsPolicy");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -25,6 +45,7 @@ namespace Api.AppDoar
             }
 
             app.UseHttpsRedirection();
+
 
             app.UseAuthorization();
 

@@ -1,6 +1,7 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.PersistenciaDB;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using MySql.Data.MySqlClient;
 
 namespace Api.AppDoar.Repositories
@@ -17,9 +18,16 @@ namespace Api.AppDoar.Repositories
             return conn.QueryFirstOrDefault<Usuario>(query, new { Email = email });
         }
 
-        public void Create(Usuario entidade)
+        public long Create(Usuario pUsuario)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return conn.Insert<Usuario>(pUsuario);
+            } 
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao cadastrar usuario: {ex.Message}");
+            }
         }
 
         public void Delete(int id)

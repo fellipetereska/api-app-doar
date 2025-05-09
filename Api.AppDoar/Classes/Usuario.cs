@@ -18,7 +18,7 @@ namespace Api.AppDoar.Classes
         [Required]
         public string role { get; set; } = string.Empty;
 
-        public bool status { get; set; }
+        public int status { get; set; }
 
         public DateTime? created_at { get; set; }
 
@@ -26,6 +26,6 @@ namespace Api.AppDoar.Classes
 
         public DateTime? deleted_at { get; set; }
 
-        public int? fkInstituicaoId { get; set; }
+        public int? instituicao_id { get; set; }
     }
 }
