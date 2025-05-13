@@ -1,6 +1,7 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.PersistenciaDB;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using MySql.Data.MySqlClient;
 
 namespace Api.AppDoar.Repositories
@@ -11,9 +12,15 @@ namespace Api.AppDoar.Repositories
 
         public InstituicaoRepositorio() { conn = ConnectionDB.GetConnection(); }
 
-        public long Create(Instituicao entidade)
+        public Instituicao? BuscarPorCnpj(string cnpj)
         {
-            throw new NotImplementedException();
+            string query = "SELECT * FROM instituicao WHERE cnpj = @Cnpj";
+            return conn.QueryFirstOrDefault<Instituicao>(query, new { Cnpj = cnpj });
+        }
+
+        public long Create(Instituicao pInstituicao)
+        {
+            return conn.Insert<Instituicao>(pInstituicao);
         }
 
         public void Delete(int id)

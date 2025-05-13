@@ -20,14 +20,7 @@ namespace Api.AppDoar.Repositories
 
         public long Create(Usuario pUsuario)
         {
-            try
-            {
-                return conn.Insert<Usuario>(pUsuario);
-            } 
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro ao cadastrar usuario: {ex.Message}");
-            }
+            return conn.Insert<Usuario>(pUsuario);
         }
 
         public void Delete(int id)
