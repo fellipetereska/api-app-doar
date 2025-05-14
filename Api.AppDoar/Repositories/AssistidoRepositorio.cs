@@ -47,9 +47,15 @@ namespace Api.AppDoar.Repositories
 
         public IEnumerable<Assistido> GetAll()
         {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Assistido> GetAllByInstituicao(int id)
+        {
             try
             {
-                return conn.GetAll<Assistido>();
+                string sql = "SELECT * FROM assistido WHERE instituicao_id = @idInstituicao";
+                return conn.Query<Assistido>(sql, new { idInstituicao = id });
             }
             catch (Exception ex)
             {

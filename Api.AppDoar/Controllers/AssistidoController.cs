@@ -26,11 +26,11 @@ namespace Api.AppDoar.Controllers
         }
 
         [HttpGet]
-        public IActionResult Listar()
+        public IActionResult Listar([FromQuery] int instituicaId)
         {
             try
             {
-                var assistidos = AssistidoRepo.GetAll();
+                var assistidos = AssistidoRepo.GetAllByInstituicao(instituicaId);
                 return Ok(assistidos);
             }
             catch (Exception ex)
