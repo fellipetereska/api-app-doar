@@ -1,4 +1,5 @@
 ﻿using Api.AppDoar.Classes;
+using Api.AppDoar.Dtos;
 using Api.AppDoar.PersistenciaDB;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -55,7 +56,7 @@ namespace Api.AppDoar.Repositories
             try
             {
                 string sql = "SELECT * FROM assistido WHERE instituicao_id = @idInstituicao";
-                return conn.Query<Assistido>(sql, new { idInstituicao = id });
+                return conn.Query<Assistido>(sql, new { idInstituicao = id }).ToList();
             }
             catch (Exception ex)
             {
@@ -101,6 +102,71 @@ namespace Api.AppDoar.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"Erro ao adicionar assistido a lista de espera: {ex.Message}");
+            }
+        }
+
+        public IEnumerable<ItemListaEsperaDto> GetItensListaEsperaPorAssistido(int assistidoId)
+        {
+            try
+            {
+                string sql = @"SELECT * FROM vw_lista_espera WHERE id = @assistidoId";
+                return conn.Query<ItemListaEsperaDto>(sql, new { assistidoId }).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar itens da lista de espera do assistido: {ex.Message}");
+            }
+        }
+
+
+        public void AdicionarItemListaEspera(ListaEspera item)
+        {
+            try
+            {
+                string sql = @"
+            INSERT INTO itens_espera_assistido 
+            (status, data_solicitacao, quantidade_solicitada, quantidade_atendida, observacao, subcategoria_id, categoria_id, assistido_id)
+            VALUES
+            (@status, @data_solicitacao, @quantidade_solicitada, @quantidade_atendida, @observacao, @subcategoria_id, @categoria_id, @assistido_id)";
+
+                conn.Execute(sql, item);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao adicionar item à lista de espera: {ex.Message}");
+            }
+        }
+
+        public void AtualizarItemListaEspera(ListaEspera item)
+        {
+            try
+            {
+                string sql = @"
+                UPDATE itens_espera_assistido SET
+                    status = @status,
+                    quantidade_atendida = @quantidade_atendida,
+                    quantidade_solicitada = @quantidade_solicitada,
+                    observacao = @observacao
+                WHERE id = @id";
+
+                conn.Execute(sql, item);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao atualizar item da lista de espera: {ex.Message}");
+            }
+        }
+
+        public void RemoverItemListaEspera(int id)
+        {
+            try
+            {
+                string sql = "DELETE FROM itens_espera_assistido WHERE id = @id";
+                conn.Execute(sql, new { id = id });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao remover item da lista de espera: {ex.Message}");
             }
         }
     }

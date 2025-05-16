@@ -6,7 +6,6 @@ namespace Api.AppDoar.Classes
     [Table("assistido")]
     public class Assistido
     {
-
         [Key]
         public int id { get; set; }
 

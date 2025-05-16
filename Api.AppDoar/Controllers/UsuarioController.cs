@@ -3,6 +3,7 @@ using Api.AppDoar.Dtos;
 using Api.AppDoar.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using BCrypt.Net;
+using Microsoft.Win32;
 
 namespace Api.AppDoar.Controllers
 {
@@ -72,7 +73,8 @@ namespace Api.AppDoar.Controllers
                 uf = register.uf,
                 tipo_documento = register.tipo_documento,
                 documento = register.documento,
-                instituicao_id = null,
+                tipo = register.tipo,
+                instituicao_id = register.instituicao_id > 0 ? register.instituicao_id : null,
                 status = 1
             };
 
@@ -87,10 +89,48 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public IActionResult Editar(int id, [FromBody] Usuario usuario)
+        {
+            var userRepo = new UsuarioRepositorio();
+
+            var usuarioExistente = userRepo.GetById(id);
+
+            try
+            {
+                if (usuarioExistente == null)
+                    return NotFound(new { message = "Usuário não encontrado." });
+
+                usuario.id = id;
+                userRepo.Update(usuario);
+                return Ok(new { message = "Usuário atualizado com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         private string GerarToken(Usuario usuario)
         {
             var token = JwtHelper.GenerateToken(usuario);
             return token;
+        }
+
+        [HttpGet("instituicao")]
+        public IActionResult ListarUsuariosByInstituicao([FromQuery] int instituicaoId)
+        {
+            var userRepo = new UsuarioRepositorio();
+
+            try
+            {
+                var usuarios = userRepo.GetAllByInstituicao(instituicaoId);
+                return Ok(usuarios);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
     }

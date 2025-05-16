@@ -33,14 +33,41 @@ namespace Api.AppDoar.Repositories
             throw new NotImplementedException();
         }
 
-        public Usuario? GetById(int id)
+        public IEnumerable<Usuario> GetAllByInstituicao(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string sql = "SELECT * FROM usuario WHERE instituicao_id = @idInstituicao";
+                return conn.Query<Usuario>(sql, new { idInstituicao = id }).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar usuarios: {ex.Message}");
+            }
         }
 
-        public void Update(Usuario entidade)
+        public Usuario? GetById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return conn.Get<Usuario>(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar usuário: {ex.Message}");
+            }
+        }
+
+        public void Update(Usuario pUsuario)
+        {
+            try
+            {
+                conn.Update(pUsuario);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao cadastrar usuário: {ex.Message}");
+            }
         }
 
         public void UpdateStatus(int id)

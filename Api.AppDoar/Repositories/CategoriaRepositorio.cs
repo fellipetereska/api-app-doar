@@ -20,15 +20,35 @@ public class CategoriaRepositorio
         return conn.Query<Categoria>(sql, new { instituicaoId }).ToList();
     }
 
-    public List<SubCategoria> GetSubcategoriasByInstituicao(int instituicaoId)
+    public List<SubCategoria> GetSubcategoriasByCategoria(int categoriaId)
     {
         string sql = @"
         SELECT s.*
         FROM subcategoria s
-        INNER JOIN categoria c ON s.categoria_id = c.id
-        WHERE c.instituicao_id = @instituicaoId";
+        INNER JOIN categoria c ON s.categoria_id = c.id";
 
-        return conn.Query<SubCategoria>(sql, new { instituicaoId }).ToList();
+        return conn.Query<SubCategoria>(sql, new { categoriaId }).ToList();
+    }
+
+    public List<object> GetCategoriasComSubcategorias(int instituicaoId)
+    {
+        string sql = @"SELECT * FROM vw_categoria WHERE InstituicaoId = @instituicaoId";
+
+        var dados = conn.Query<CategoriaComSubCategoriaDto>(sql, new { instituicaoId });
+
+        var agrupado = dados
+            .GroupBy(c => new { c.CategoriaId, c.CategoriaNome })
+            .Select(g => new
+            {
+                id = g.Key.CategoriaId,
+                nome = g.Key.CategoriaNome,
+                subcategorias = g
+                    .Where(x => x.SubcategoriaId.HasValue)
+                    .Select(x => new { id = x.SubcategoriaId, nome = x.SubcategoriaNome })
+                    .ToList()
+            }).ToList<object>();
+
+        return agrupado;
     }
 
     public int CriarCategoriaComSubcategorias(CategoriaDto dto)
@@ -80,9 +100,35 @@ public class CategoriaRepositorio
         }
     }
 
-    public void AtualizarNomeCategoria(int categoriaId, string novoNome)
+    public void AtualizarCategoriaComSubcategorias(int categoriaId, CategoriaDto dto)
     {
-        string update = "UPDATE categoria SET nome = @nome WHERE id = @id";
-        conn.Execute(update, new { nome = novoNome, id = categoriaId });
+        using var transaction = conn.BeginTransaction();
+
+        try
+        {
+            // Atualiza nome
+            string updateCategoria = "UPDATE categoria SET nome = @nome WHERE id = @id";
+            conn.Execute(updateCategoria, new { Nome = dto.nome, id = categoriaId }, transaction);
+
+            // Apaga todas as subcategorias antigas
+            string deleteSubcategorias = "DELETE FROM subcategoria WHERE categoria_id = @categoriaId";
+            conn.Execute(deleteSubcategorias, new { categoriaId }, transaction);
+
+            // Insere as novas
+            string insertSub = "INSERT INTO subcategoria (nome, categoria_id) VALUES (@nome, @categoriaId)";
+            foreach (var sub in dto.subcategorias)
+            {
+                conn.Execute(insertSub, new { nome = sub, categoriaId }, transaction);
+            }
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
+
+
 }

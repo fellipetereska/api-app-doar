@@ -12,18 +12,7 @@ public class CategoriaController : ControllerBase
     {
         try
         {
-            var categorias = _repo.GetAllByInstituicao(id);
-            var subcategorias = _repo.GetSubcategoriasByInstituicao(id);
-
-            var resultado = categorias.Select(cat => new
-            {
-                Nome = cat.nome,
-                subcategorias = subcategorias
-                    .Where(s => s.categoriaId == cat.id)
-                    .Select(s => s.nome)
-                    .ToList()
-            }).ToList();
-
+            var resultado = _repo.GetCategoriasComSubcategorias(id);
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -52,9 +41,7 @@ public class CategoriaController : ControllerBase
     {
         try
         {
-            _repo.AtualizarNomeCategoria(id, dto.nome);
-            _repo.AdicionarSubcategorias(id, dto.subcategorias);
-
+            _repo.AtualizarCategoriaComSubcategorias(id, dto);
             return Ok(new { message = "Categoria atualizada com sucesso!" });
         }
         catch (Exception ex)
@@ -62,4 +49,5 @@ public class CategoriaController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
 }
