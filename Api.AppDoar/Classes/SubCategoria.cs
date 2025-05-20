@@ -4,13 +4,14 @@ using System.ComponentModel.DataAnnotations;
 namespace Api.AppDoar.Classes
 {
     [Table("subcategoria")]
-    public class SubCategoria
+    public class Subcategoria
     {
         [ExplicitKey]
-        public int id { get; set; }
-        [Required]
+        public int idsubcategoria { get; set; }
+
         public string nome { get; set; } = string.Empty;
+
         [Required]
-        public int categoriaId { get; set;}
+        public int categoria_id { get; set; }
     }
 }

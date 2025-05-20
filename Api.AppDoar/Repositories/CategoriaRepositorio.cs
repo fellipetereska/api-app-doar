@@ -20,14 +20,14 @@ public class CategoriaRepositorio
         return conn.Query<Categoria>(sql, new { instituicaoId }).ToList();
     }
 
-    public List<SubCategoria> GetSubcategoriasByCategoria(int categoriaId)
+    public List<Subcategoria> GetSubcategoriasByCategoria(int categoriaId)
     {
         string sql = @"
         SELECT s.*
         FROM subcategoria s
         INNER JOIN categoria c ON s.categoria_id = c.id";
 
-        return conn.Query<SubCategoria>(sql, new { categoriaId }).ToList();
+        return conn.Query<Subcategoria>(sql, new { categoriaId }).ToList();
     }
 
     public List<object> GetCategoriasComSubcategorias(int instituicaoId)

@@ -9,7 +9,11 @@ namespace Api.AppDoar.PersistenciaDB
         // Construtor - Toda vez que a classe for chamada ela automáticamente já se conecta no banco
         static ConnectionDB()
         {
-            conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=;");
+            // Banco Boca
+            // conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=;");
+
+            // Banco Tereska
+            conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=fte3009;");
             conn.Open();
         }
 
