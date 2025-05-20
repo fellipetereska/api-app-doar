@@ -17,6 +17,7 @@
         public string uf { get; set; } = string.Empty;
         public string tipo_documento { get; set; } = string.Empty;
         public string documento { get; set; } = string.Empty;
+        public string tipo { get; set; } = "administrador";
         public int status { get; set; } = 1;
         public int? instituicao_id { get; set; }
     }
