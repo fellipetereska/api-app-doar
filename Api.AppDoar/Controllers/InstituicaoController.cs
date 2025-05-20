@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.AppDoar.Controllers
 {
     [ApiController]
-    [Route("/instituicao")]
+    [Route("api/[controller]")]
     public class InstituicaoController : Controller
     {
         [HttpPost("registrar")]
@@ -14,7 +14,6 @@ namespace Api.AppDoar.Controllers
         {
             var userRepo = new UsuarioRepositorio();
             var InstituicaoRepo = new InstituicaoRepositorio();
-            var doadorRepo = new DoadorRepositorio();
 
             var instituicaoExiste = InstituicaoRepo.BuscarPorCnpj(dto.instituicao.cnpj);
 
@@ -38,7 +37,7 @@ namespace Api.AppDoar.Controllers
                 complemento = dto.instituicao.complemento,
                 bairro = dto.instituicao.bairro,
                 cidade = dto.instituicao.cidade,
-                uf = dto.usuario.uf,
+                uf = dto.instituicao.uf,
                 descricao = dto.instituicao.descricao,
                 latitude = 0,
                 longitude = 0,
@@ -52,6 +51,7 @@ namespace Api.AppDoar.Controllers
 
                 var novoUsuario = new Usuario
                 {
+                    nome = dto.usuario.nome,
                     email = dto.usuario.email,
                     // Criptografar a senha
                     senha = BCrypt.Net.BCrypt.HashPassword(dto.usuario.senha),
@@ -65,6 +65,48 @@ namespace Api.AppDoar.Controllers
                 var usuarioCriado = userRepo.Create(novoUsuario);
                 return Ok(new { usuario = usuarioCriado, instituicao = instituicaoCriada });
 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Editar(int id, [FromBody] Instituicao instituicao)
+        {
+            var instituicaoRepo = new InstituicaoRepositorio();
+
+            var instituicaoExistente = instituicaoRepo.GetById(id);
+
+            try
+            {
+                if (instituicaoExistente == null)
+                    return NotFound(new { message = "Instituição não encontrada." });
+
+                instituicao.id = id;
+                instituicaoRepo.Update(instituicao);
+                return Ok(new { message = "Instituição atualizada com sucesso." });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult BuscarPorId(int id)
+        {
+            var instituicaoRepo = new InstituicaoRepositorio();
+
+            var instituicao = instituicaoRepo.GetById(id);
+            try
+            {
+                if (instituicao == null)
+                    return NotFound(new { message = "Instituição não encontrada." });
+
+                return Ok(instituicao);
             }
             catch (Exception ex)
             {

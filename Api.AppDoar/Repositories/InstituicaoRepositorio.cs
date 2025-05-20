@@ -49,9 +49,9 @@ namespace Api.AppDoar.Repositories
             }
         }
 
-        public void Update(Instituicao entidade)
+        public void Update(Instituicao pInstituicao)
         {
-            throw new NotImplementedException();
+            conn.Update<Instituicao>(pInstituicao);
         }
 
         public void UpdateStatus(int id)
