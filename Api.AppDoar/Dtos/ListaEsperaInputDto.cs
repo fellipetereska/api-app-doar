@@ -2,7 +2,7 @@
 {
     public class ListaEsperaInputDto
     {
-        public int id_item { get; set; } // usado para identificar se é update ou insert
+        public int id_item { get; set; }
         public int categoria_id { get; set; }
         public int subcategoria_id { get; set; }
         public int quantidade_solicitada { get; set; } = 1;

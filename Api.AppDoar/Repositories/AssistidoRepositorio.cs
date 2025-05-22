@@ -124,10 +124,10 @@ namespace Api.AppDoar.Repositories
             try
             {
                 string sql = @"
-            INSERT INTO itens_espera_assistido 
-            (status, data_solicitacao, quantidade_solicitada, quantidade_atendida, observacao, subcategoria_id, categoria_id, assistido_id)
-            VALUES
-            (@status, @data_solicitacao, @quantidade_solicitada, @quantidade_atendida, @observacao, @subcategoria_id, @categoria_id, @assistido_id)";
+                    INSERT INTO itens_espera_assistido 
+                    (status, data_solicitacao, quantidade_solicitada, quantidade_atendida, observacao, subcategoria_id, categoria_id, assistido_id)
+                    VALUES
+                    (@status, @data_solicitacao, @quantidade_solicitada, @quantidade_atendida, @observacao, @subcategoria_id, @categoria_id, @assistido_id)";
 
                 conn.Execute(sql, item);
             }
@@ -142,12 +142,12 @@ namespace Api.AppDoar.Repositories
             try
             {
                 string sql = @"
-                UPDATE itens_espera_assistido SET
-                    status = @status,
-                    quantidade_atendida = @quantidade_atendida,
-                    quantidade_solicitada = @quantidade_solicitada,
-                    observacao = @observacao
-                WHERE id = @id";
+                    UPDATE itens_espera_assistido SET
+                        status = @status,
+                        quantidade_atendida = @quantidade_atendida,
+                        quantidade_solicitada = @quantidade_solicitada,
+                        observacao = @observacao
+                    WHERE id = @id";
 
                 conn.Execute(sql, item);
             }
