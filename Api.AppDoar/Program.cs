@@ -1,4 +1,5 @@
 using Api.AppDoar.Repositories;
+using Api.AppDoar.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -15,8 +16,16 @@ namespace Api.AppDoar
             // Add services to the container.
             builder.Services.AddControllers();
 
+
             // Repositórios
             builder.Services.AddScoped<DoacaoRepositorio>();
+            builder.Services.AddScoped<CategoriaRepositorio>();
+            builder.Services.AddScoped<EnderecoRepositorio>();
+
+            // Serviços
+            builder.Services.AddScoped<DoacaoService>();
+            builder.Services.AddScoped<DoacaoCategoriaService>();
+
 
             // Configuração para upload de arquivos grandes
             builder.Services.Configure<FormOptions>(options =>

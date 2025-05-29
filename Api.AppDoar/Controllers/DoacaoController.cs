@@ -1,9 +1,11 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.Dtos;
 using Api.AppDoar.Repositories;
+using Api.AppDoar.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 using Microsoft.AspNetCore.StaticFiles;
+using System.IO;
 
 namespace Api.AppDoar.Controllers
 {
@@ -11,18 +13,24 @@ namespace Api.AppDoar.Controllers
     [ApiController]
     public class DoacaoController : ControllerBase
     {
-        private readonly DoacaoRepositorio _doacaoRepo;
+        private readonly DoacaoService _doacaoService;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
+        private readonly DoacaoCategoriaService _doacaoCategoriaService;
+        private readonly DoacaoRepositorio _doacaoRepo;
 
         public DoacaoController(
-            DoacaoRepositorio doacaoRepo,
+            DoacaoService doacaoService,
             IWebHostEnvironment env,
-            IConfiguration config)
+            IConfiguration config,
+            DoacaoCategoriaService doacaoCategoriaService,
+            DoacaoRepositorio doacaoRepo)
         {
-            _doacaoRepo = doacaoRepo;
+            _doacaoService = doacaoService;
             _env = env;
             _config = config;
+            _doacaoCategoriaService = doacaoCategoriaService;
+            _doacaoRepo = doacaoRepo;
         }
 
         [HttpPost]
@@ -31,103 +39,60 @@ namespace Api.AppDoar.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
                 if (doacaoDto.Itens == null || !doacaoDto.Itens.Any())
+                    return BadRequest("Pelo menos um item é obrigatório.");
+
+                List<string> imagensUrls = new();
+                if (doacaoDto.ImagensDoacao != null && doacaoDto.ImagensDoacao.Any())
                 {
-                    ModelState.AddModelError("Itens", "Pelo menos um item é obrigatório");
-                    return BadRequest(ModelState);
+                    imagensUrls = await ProcessarUploadImagens(
+                        doacaoDto.ImagensDoacao,
+                        "doacao",
+                        doacaoDto.InstituicaoId);
                 }
 
-                var doacao = new Doacao
-                {
-                    doador_id = doacaoDto.doador_id,
-                    instituicao_id = doacaoDto.instituicao_id,
-                    horario_retirada = doacaoDto.horario_retirada,
-                    endereco = doacaoDto.endereco,
-                    tipo_entrega = doacaoDto.tipo_entrega,
-                    usuario_id = doacaoDto.usuario_id,
-                    created_at = DateTime.Now
-                };
-
-                var doacaoId = _doacaoRepo.Create(doacao);
-                var imagensDoacaoUrls = new List<string>();
-                if (doacaoDto.ImagensDoacao != null && doacaoDto.ImagensDoacao.Count > 0)
-                {
-                    // Converter List<IFormFile> para FormFileCollection
-                    var formFileCollection = new FormFileCollection();
-                    foreach (var file in doacaoDto.ImagensDoacao)
-                    {
-                        formFileCollection.Add(file);
-                    }
-
-                    imagensDoacaoUrls = await ProcessarUploadImagens(formFileCollection, "doacoes");
-
-                    var imagensDoacao = imagensDoacaoUrls.Select((url, index) => new DoacaoImagem
-                    {
-                        doacao_id = (int)doacaoId,
-                        url_imagem = url,
-                        ordem = index,
-                    }).ToList();
-
-                    _doacaoRepo.CreateImagensDoacao(imagensDoacao);
-                }
-
-                var itensProcessados = new List<DoacaoItem>();
-                foreach (var itemDto in doacaoDto.Itens.Where(i => i != null)) // Filtra itens nulos
-                {
-                    if (string.IsNullOrWhiteSpace(itemDto.Nome) ||
-                        string.IsNullOrWhiteSpace(itemDto.Estado) ||
-                        itemDto.Quantidade <= 0 ||
-                        itemDto.SubcategoriaId <= 0)
-                    {
-                        continue; 
-                    }
-
-                    var item = new DoacaoItem
-                    {
-                        doacao_id = (int)doacaoId,
-                        nome = itemDto.Nome,
-                        descricao = itemDto.Descricao ?? string.Empty,
-                        estado = itemDto.Estado,
-                        quantidade = itemDto.Quantidade,
-                        subcategoria_idsubcategoria = itemDto.SubcategoriaId
-                    };
-
-                    if (itemDto.ImagensItem != null && itemDto.ImagensItem.Count > 0)
-                    {
-                        var itemFormFileCollection = new FormFileCollection();
-                        foreach (var file in itemDto.ImagensItem)
-                        {
-                            itemFormFileCollection.Add(file);
-                        }
-
-                        var imagensItemUrls = await ProcessarUploadImagens(itemFormFileCollection, "itens");
-                        item.descricao += $"\n\nImagens do item:\n{string.Join("\n", imagensItemUrls)}";
-                    }
-
-                    itensProcessados.Add(item);
-                }
-
-                if (!itensProcessados.Any())
-                {
-                    return BadRequest("Nenhum item válido foi enviado");
-                }
-
-                _doacaoRepo.CreateItensDoacao(itensProcessados);
+                var doacaoId = _doacaoService.CriarDoacaoCompleta(doacaoDto, imagensUrls);
 
                 return Ok(new
                 {
-                    id = doacaoId,
-                    message = "Doação criada com sucesso!",
-                    imagens = imagensDoacaoUrls
+                    Id = doacaoId,
+                    Message = "Doação criada com sucesso!",
+                    Imagens = imagensUrls
                 });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erro ao criar doação: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult ObterDoacao(int id)
+        {
+            try
+            {
+                var doacao = _doacaoService.ObterDoacaoCompleta(id);
+                return Ok(doacao);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao obter doação: {ex.Message}");
+            }
+        }
+
+        [HttpGet("categorias/{instituicaoId}")]
+        public IActionResult GetCategoriasPorInstituicao(int instituicaoId)
+        {
+            try
+            {
+                var categorias = _doacaoCategoriaService.GetCategoriasComSubcategorias(instituicaoId);
+                return Ok(categorias);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar categorias: {ex.Message}");
             }
         }
 
@@ -145,24 +110,20 @@ namespace Api.AppDoar.Controllers
             }
         }
 
-        [HttpGet("imagem/{nomeArquivo}")]
-        public IActionResult GetImagem(string nomeArquivo)
+        [HttpGet("imagem/{*path}")]
+        public IActionResult GetImagem(string path)
         {
             try
             {
                 var uploadsPath = Path.Combine(_env.ContentRootPath, "Uploads");
-                var filePath = Path.Combine(uploadsPath, nomeArquivo);
+                var filePath = Path.Combine(uploadsPath, path);
 
                 if (!System.IO.File.Exists(filePath))
-                {
                     return NotFound();
-                }
 
                 var provider = new FileExtensionContentTypeProvider();
                 if (!provider.TryGetContentType(filePath, out var contentType))
-                {
                     contentType = "application/octet-stream";
-                }
 
                 var fileStream = System.IO.File.OpenRead(filePath);
                 return File(fileStream, contentType);
@@ -173,42 +134,59 @@ namespace Api.AppDoar.Controllers
             }
         }
 
-        private async Task<List<string>> ProcessarUploadImagens(IFormFileCollection files, string subpasta)
+        private async Task<List<string>> ProcessarUploadImagens(
+            IEnumerable<IFormFile> files,
+            string subpasta,
+            int? instituicaoId = null,
+            int? doacaoId = null)
         {
             var urls = new List<string>();
 
             if (files == null || !files.Any())
-            {
                 return urls;
-            }
 
-            var uploadsPath = Path.Combine(_env.ContentRootPath, "Uploads", subpasta);
+            var basePath = Path.Combine(_env.ContentRootPath, "Uploads");
 
-            if (!Directory.Exists(uploadsPath))
-            {
-                Directory.CreateDirectory(uploadsPath);
-            }
+            if (instituicaoId.HasValue)
+                basePath = Path.Combine(basePath, $"instituicao_{instituicaoId.Value}");
+
+            if (doacaoId.HasValue)
+                basePath = Path.Combine(basePath, $"doacao_{doacaoId.Value}");
+
+            basePath = Path.Combine(basePath, subpasta);
+
+            if (!Directory.Exists(basePath))
+                Directory.CreateDirectory(basePath);
 
             foreach (var file in files)
             {
                 if (file.Length == 0) continue;
 
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-                if (string.IsNullOrEmpty(extension)) continue;
-                if (!allowedExtensions.Contains(extension)) continue;
+                if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
+                    continue;
 
                 var fileName = $"{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(uploadsPath, fileName);
+                var filePath = Path.Combine(basePath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
-                {
                     await file.CopyToAsync(stream);
-                }
 
+                var pathSegments = new List<string> { "Uploads" };
+
+                if (instituicaoId.HasValue)
+                    pathSegments.Add($"instituicao_{instituicaoId.Value}");
+
+                if (doacaoId.HasValue)
+                    pathSegments.Add($"doacao_{doacaoId.Value}");
+
+                pathSegments.Add(subpasta);
+                pathSegments.Add(fileName);
+
+                var relativePath = Path.Combine(pathSegments.ToArray()).Replace("\\", "/");
                 var baseUrl = _config["BaseUrl"] ?? $"{Request.Scheme}://{Request.Host}";
-                var relativePath = Path.Combine("Uploads", subpasta, fileName).Replace("\\", "/");
                 urls.Add($"{baseUrl}/api/doacao/imagem/{relativePath}");
             }
 

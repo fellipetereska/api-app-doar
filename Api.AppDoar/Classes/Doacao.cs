@@ -1,4 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Api.AppDoar.Classes
@@ -20,9 +21,9 @@ namespace Api.AppDoar.Classes
         public string endereco { get; set; } = string.Empty;
 
         [Required]
-        public string tipo_entrega { get; set; } = string.Empty; 
+        public string tipo_entrega { get; set; } = string.Empty;
 
-        public string status { get; set; } = "pendente"; 
+        public string status { get; set; } = "pendente";
 
         [Required]
         public int usuario_id { get; set; }
@@ -31,5 +32,11 @@ namespace Api.AppDoar.Classes
 
         public DateTime? created_at { get; set; }
         public DateTime? updated_at { get; set; }
+
+        [Computed]
+        public List<DoacaoItem> Itens { get; set; } = new List<DoacaoItem>();
+
+        [Computed]
+        public List<DoacaoImagem> Imagens { get; set; } = new List<DoacaoImagem>();
     }
 }

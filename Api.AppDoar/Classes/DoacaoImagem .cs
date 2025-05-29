@@ -13,9 +13,8 @@ namespace Api.AppDoar.Classes
         public int doacao_id { get; set; }
 
         [Required]
-        public string url_imagem { get; set; } = string.Empty;
+        public string url_imagem { get; set; }
 
-        public int ordem { get; set; } = 0; 
-
+        public int ordem { get; set; } = 0;
     }
 }

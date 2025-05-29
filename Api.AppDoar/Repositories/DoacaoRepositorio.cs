@@ -20,9 +20,6 @@ namespace Api.AppDoar.Repositories
             try
             {
                 var doacaoId = conn.Insert(doacao);
-
-                doacao.id = (int)doacaoId;
-
                 return doacaoId;
             }
             catch (Exception ex)
@@ -47,17 +44,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
-                var doacao = conn.Get<Doacao>(id);
-
-                if (doacao != null)
-                {
-                    var itens = conn.Query<DoacaoItem>(
-                        "SELECT * FROM doacao_item WHERE doacao_id = @DoacaoId",
-                        new { DoacaoId = id });
-
-                }
-
-                return doacao;
+                return conn.Get<Doacao>(id);
             }
             catch (Exception ex)
             {
@@ -65,24 +52,18 @@ namespace Api.AppDoar.Repositories
             }
         }
 
-        public IEnumerable<Doacao> GetAll()
+        public IEnumerable<DoacaoItem> GetItensByDoacaoId(int doacaoId)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Update(Doacao entidade)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateStatus(int id)
-        {
-            throw new NotImplementedException();
+            try
+            {
+                return conn.Query<DoacaoItem>(
+                    "SELECT * FROM doacao_item WHERE doacao_id = @DoacaoId",
+                    new { DoacaoId = doacaoId });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar itens da doação: {ex.Message}");
+            }
         }
 
         public void CreateImagensDoacao(IEnumerable<DoacaoImagem> imagens)
@@ -110,5 +91,20 @@ namespace Api.AppDoar.Repositories
                 throw new Exception($"Erro ao buscar imagens da doação: {ex.Message}");
             }
         }
+
+        public Instituicao GetInstituicaoById(int id)
+        {
+            return conn.Get<Instituicao>(id);
+        }
+
+        public T ExecuteScalar<T>(string sql, object parameters = null)
+        {
+            return conn.ExecuteScalar<T>(sql, parameters);
+        }
+
+        public IEnumerable<Doacao> GetAll() => throw new NotImplementedException();
+        public void Update(Doacao entidade) => throw new NotImplementedException();
+        public void Delete(int id) => throw new NotImplementedException();
+        public void UpdateStatus(int id) => throw new NotImplementedException();
     }
 }

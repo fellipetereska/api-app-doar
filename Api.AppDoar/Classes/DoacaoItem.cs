@@ -13,12 +13,13 @@ namespace Api.AppDoar.Classes
         public int doacao_id { get; set; }
 
         [Required]
-        public string nome { get; set; } = string.Empty;
-
-        public string descricao { get; set; } = string.Empty;
+        public string nome { get; set; }
 
         [Required]
-        public string estado { get; set; } = string.Empty; 
+        public string descricao { get; set; }
+
+        [Required]
+        public string estado { get; set; }
 
         [Required]
         public int quantidade { get; set; }
