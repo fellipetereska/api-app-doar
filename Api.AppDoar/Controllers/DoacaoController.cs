@@ -82,6 +82,20 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpGet("instituicao/{instituicaoId}")]
+        public IActionResult GetDoacoesPorInstituicao(int instituicaoId, [FromQuery] string status = "pendente")
+        {
+            try
+            {
+                var doacoes = _doacaoRepo.GetByInstituicaoId(instituicaoId, status);
+                return Ok(doacoes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar doações: {ex.Message}");
+            }
+        }
+
         [HttpGet("categorias/{instituicaoId}")]
         public IActionResult GetCategoriasPorInstituicao(int instituicaoId)
         {
@@ -93,6 +107,22 @@ namespace Api.AppDoar.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erro ao buscar categorias: {ex.Message}");
+            }
+        }
+
+        [HttpPatch("{id}/status")]
+        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        {
+            try
+            {
+                var success = _doacaoRepo.UpdateStatus(id, dto.Status);
+                if (!success) return NotFound();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao atualizar status: {ex.Message}");
             }
         }
 

@@ -7,6 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Classes\NewFolder1\**" />
+    <Compile Remove="Classes\NewFolder2\**" />
+    <Compile Remove="Classes\NewFolder\**" />
+    <Content Remove="Classes\NewFolder1\**" />
+    <Content Remove="Classes\NewFolder2\**" />
+    <Content Remove="Classes\NewFolder\**" />
+    <EmbeddedResource Remove="Classes\NewFolder1\**" />
+    <EmbeddedResource Remove="Classes\NewFolder2\**" />
+    <EmbeddedResource Remove="Classes\NewFolder\**" />
+    <None Remove="Classes\NewFolder1\**" />
+    <None Remove="Classes\NewFolder2\**" />
+    <None Remove="Classes\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />

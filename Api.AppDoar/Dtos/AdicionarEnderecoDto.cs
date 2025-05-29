@@ -4,6 +4,9 @@ namespace Api.AppDoar.Dtos
 {
     public class AdicionarEnderecoDto
     {
+
+        public int UsuarioId { get; set; }
+
         [Required]
         public string Logradouro { get; set; }
 

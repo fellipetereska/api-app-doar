@@ -66,6 +66,39 @@ namespace Api.AppDoar.Repositories
             }
         }
 
+        public IEnumerable<Doacao> GetByInstituicaoId(int instituicaoId, string status)
+        {
+            var sql = @"
+        SELECT * FROM doacao 
+        WHERE instituicao_id = @InstituicaoId 
+        AND status = @Status
+        ORDER BY created_at DESC";
+
+            return conn.Query<Doacao>(sql, new
+            {
+                InstituicaoId = instituicaoId,
+                Status = status
+            });
+        }
+
+        public bool UpdateStatus(int id, string status)
+        {
+            var sql = @"
+        UPDATE doacao 
+        SET status = @Status, 
+            updated_at = @UpdatedAt 
+        WHERE id = @Id";
+
+            var rowsAffected = conn.Execute(sql, new
+            {
+                Id = id,
+                Status = status,
+                UpdatedAt = DateTime.Now
+            });
+
+            return rowsAffected > 0;
+        }
+
         public void CreateImagensDoacao(IEnumerable<DoacaoImagem> imagens)
         {
             try
