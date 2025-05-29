@@ -12,6 +12,7 @@ namespace Api.AppDoar.Controllers
     {
         private readonly EntregasRepositorio EntregasRepo = new EntregasRepositorio();
         private readonly ItensEntregaRepositorio ItensEntregaRepo = new ItensEntregaRepositorio();
+        private readonly AssistidoRepositorio AssisitoRepo = new AssistidoRepositorio();
 
         [HttpGet]
         public IActionResult Listar([FromQuery] int instituicaoId)
@@ -28,10 +29,26 @@ namespace Api.AppDoar.Controllers
         }
 
         [HttpPost]
-        public IActionResult Adicionar([FromBody] EntregaPostDto dto)
+        public IActionResult Adicionar([FromBody] EntregasDto.EntregaPostDto dto)
         {
             try
             {
+                var itensEntrega = dto.itens.Select(item => new ItensEntrega
+                {
+                    quantidade = item.quantidade,
+                    estoque_id = item.estoque_id,
+                    categoria_id = item.categoria_id,
+                    subcategoria_id = item.subcategoria_id
+                }).ToList();
+
+                var itensEntregues = dto.itens.Select(item => new ItemEntregaDto
+                {
+                    assistido_id = dto.assistido_id,
+                    categoria_id = item.categoria_id,
+                    subcategoria_id = item.subcategoria_id,
+                    quantidade = item.quantidade
+                }).ToList();
+
                 var entrega = new Entregas
                 {
                     data = dto.data,
@@ -42,28 +59,17 @@ namespace Api.AppDoar.Controllers
                     status = dto.status
                 };
 
-                var entregaId = EntregasRepo.Create(entrega);
-
-                foreach (var item in dto.itens)
-                {
-                    var novoItem = new ItensEntrega
-                    {
-                        entregas_id = (int)entregaId,
-                        quantidade = item.quantidade,
-                        estoque_id = item.estoque_id,
-                        categoria_id = item.categoria_id,
-                        subcategoria_id = item.subcategoria_id
-                    };
-
-                    ItensEntregaRepo.Create(novoItem);
-                }
+                EntregasRepo.RegistrarEntregaComItensEAtualizarLista(entrega, itensEntrega, itensEntregues);
 
                 return Ok(new { message = "Entrega registrada com sucesso!" });
             }
             catch (Exception ex)
             {
+                if (ex.Message.Contains("Estoque insuficiente"))
+                    return BadRequest(new { message = ex.Message });
+
                 Console.Error.WriteLine(ex.ToString());
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Erro ao registrar entrega." });
             }
         }
 
@@ -71,12 +77,13 @@ namespace Api.AppDoar.Controllers
         public IActionResult GetEntregasByInstituicao(
             int instituicaoId,
             [FromQuery] string? status,
+            [FromQuery] string? tipo_entrega,
             [FromQuery] int? assistidoId,
             [FromQuery] DateTime? data)
         {
             try
             {
-                var resultados = EntregasRepo.GetByInstituicao(instituicaoId, status, assistidoId, data);
+                var resultados = EntregasRepo.GetByInstituicao(instituicaoId, status, tipo_entrega, assistidoId, data);
 
                 var agrupado = resultados
                     .GroupBy(e => new
@@ -88,7 +95,11 @@ namespace Api.AppDoar.Controllers
                         e.assistido_id,
                         e.tipo_entrega,
                         e.status,
-                        e.nome_assistido
+                        e.nome_assistido,
+                        e.latitude_assistido,
+                        e.longitude_assistido,
+                        e.endereco_completo,
+                        e.cep_assistido,
                     })
                     .Select(g => new EntregaAgrupadaDto
                     {
@@ -100,6 +111,10 @@ namespace Api.AppDoar.Controllers
                         tipo_entrega = g.Key.tipo_entrega,
                         status = g.Key.status,
                         nome_assistido = g.Key.nome_assistido,
+                        latitude_assistido = g.Key.latitude_assistido,
+                        longitude_assistido = g.Key.latitude_assistido,
+                        endereco_completo = g.Key.endereco_completo,
+                        cep_assistido = g.Key.cep_assistido,
                         itens = g
                             .Where(x => x.item_id != null)
                             .Select(x => new ItemEntregaDto
@@ -123,6 +138,8 @@ namespace Api.AppDoar.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        // Criar o controller
 
         public class StatusDto
         {
@@ -165,5 +182,18 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpPost("cancelar/{id}")]
+        public IActionResult Cancelar(int id)
+        {
+            try
+            {
+                EntregasRepo.CancelarDoacao(id);
+                return Ok(new { message = "Doação cancelada com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

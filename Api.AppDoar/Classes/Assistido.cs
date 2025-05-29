@@ -21,6 +21,8 @@ namespace Api.AppDoar.Classes
         public string telefone { get; set; } = string.Empty;
 
         [Required]
+        public string cep {  get; set; } = string.Empty;
+
         public string logradouro { get; set; } = string.Empty;
 
         [Required]
@@ -40,8 +42,8 @@ namespace Api.AppDoar.Classes
         [Required]
         public string uf { get; set; } = string.Empty;
 
-        public decimal? latitude { get; set; }
-        public decimal? longitude { get; set; }
+        public string latitude { get; set; } = string.Empty;
+        public string longitude { get; set; } = string.Empty;
 
         public int status_lista_espera { get; set; } = 0;
 

@@ -4,6 +4,7 @@ using Api.AppDoar.PersistenciaDB;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace Api.AppDoar.Repositories
 {
