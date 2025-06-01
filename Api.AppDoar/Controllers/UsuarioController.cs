@@ -4,6 +4,7 @@ using Api.AppDoar.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using BCrypt.Net;
 using Microsoft.Win32;
+using Api.AppDoar.Repositories.instituicao;
 
 namespace Api.AppDoar.Controllers
 {
