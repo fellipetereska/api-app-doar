@@ -10,10 +10,10 @@ namespace Api.AppDoar.PersistenciaDB
         static ConnectionDB()
         {
             // Banco Boca
-            // conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=;");
+            conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=;");
 
             // Banco Tereska
-            conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=fte3009;");
+            // conn = new MySqlConnection("Server=localhost;Database=db_doar;Uid=root;Pwd=fte3009;");
             conn.Open();
         }
 
