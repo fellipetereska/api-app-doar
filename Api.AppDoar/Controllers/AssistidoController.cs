@@ -40,6 +40,21 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpGet("projetos")]
+        public IActionResult ListarAssistidosComProjetos([FromQuery] int instituicaoId)
+        {
+            try
+            {
+                var assistidos = AssistidoRepo.GetAllComProjetosByInstituicao(instituicaoId);
+                return Ok(assistidos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
         [HttpGet("{id}")]
         public IActionResult BuscarPorId(int id)
         {
@@ -224,5 +239,19 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpPost("{id}/vincular_projeto")]
+        public IActionResult VincularProjeto(int id, [FromBody] VincularProjetoDto body)
+        {
+            try
+            {
+                int projetoId = body.projeto_id;
+                AssistidoRepo.VincularProjeto(id, projetoId);
+                return Ok(new { message = "Projeto vinculado com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

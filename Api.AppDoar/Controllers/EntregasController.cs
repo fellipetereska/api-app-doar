@@ -139,8 +139,6 @@ namespace Api.AppDoar.Controllers
             }
         }
 
-        // Criar o controller
-
         public class StatusDto
         {
             public string status { get; set; } = string.Empty;
