@@ -1,4 +1,5 @@
-﻿using Api.AppDoar.Classes;
+﻿using Api.AppDoar.Classes.assistido;
+using Api.AppDoar.Classes;
 
 namespace Api.AppDoar.Dtos
 {

@@ -1,6 +1,7 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.Classes.assistido;
 using Api.AppDoar.Classes.instituicao;
+using Api.AppDoar.Dtos;
 using Api.AppDoar.Dtos.instituicao;
 using Api.AppDoar.Repositories.assistido;
 using Microsoft.AspNetCore.Mvc;
