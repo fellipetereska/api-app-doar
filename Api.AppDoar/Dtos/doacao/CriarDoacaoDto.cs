@@ -17,10 +17,6 @@ namespace Api.AppDoar.Dtos.doacao
         [Required]
         public string TipoEntrega { get; set; }
 
-        public int? EnderecoId { get; set; }
-
-        public AdicionarEnderecoDto? NovoEndereco { get; set; }
-
         [Required]
         [MinLength(1, ErrorMessage = "Pelo menos um item é obrigatório")]
         public List<ItemDoacaoSwaggerDto> Itens { get; set; } = new List<ItemDoacaoSwaggerDto>();

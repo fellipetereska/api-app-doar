@@ -1,5 +1,7 @@
+using Api.AppDoar.Repositories;
 using Api.AppDoar.Repositories.doacao;
 using Api.AppDoar.Repositories.doador;
+using Api.AppDoar.Repositories.instituicao;
 using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.StaticFiles;
@@ -17,13 +19,18 @@ namespace Api.AppDoar
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
-
+            builder.Services.AddControllers()
+  .AddJsonOptions(options =>
+  {
+      options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+  });
 
             // Repositórios
             builder.Services.AddScoped<DoacaoRepositorio>();
             builder.Services.AddScoped<CategoriaRepositorio>();
             builder.Services.AddScoped<EnderecoRepositorio>();
+            builder.Services.AddScoped<UsuarioRepositorio>();
+            builder.Services.AddScoped<InstituicaoRepositorio>();
 
             // Serviços
             builder.Services.AddScoped<DoacaoService>();

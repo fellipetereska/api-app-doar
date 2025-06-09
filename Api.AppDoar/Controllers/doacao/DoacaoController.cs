@@ -1,6 +1,9 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.Dtos.doacao;
+using Api.AppDoar.Enum;
+using Api.AppDoar.Repositories;
 using Api.AppDoar.Repositories.doacao;
+using Api.AppDoar.Repositories.doador;
 using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,19 +21,28 @@ namespace Api.AppDoar.Controllers.doacao
         private readonly IConfiguration _config;
         private readonly DoacaoCategoriaService _doacaoCategoriaService;
         private readonly DoacaoRepositorio _doacaoRepo;
+        private readonly EnderecoRepositorio _enderecoRepo;
+        private readonly UsuarioRepositorio _usuarioRepo;
+
+
 
         public DoacaoController(
-            DoacaoService doacaoService,
-            IWebHostEnvironment env,
-            IConfiguration config,
-            DoacaoCategoriaService doacaoCategoriaService,
-            DoacaoRepositorio doacaoRepo)
+    DoacaoService doacaoService,
+    IWebHostEnvironment env,
+    IConfiguration config,
+    DoacaoCategoriaService doacaoCategoriaService,
+    DoacaoRepositorio doacaoRepo,
+    EnderecoRepositorio enderecoRepo,
+    UsuarioRepositorio usuarioRepo
+            ) 
         {
             _doacaoService = doacaoService;
             _env = env;
             _config = config;
             _doacaoCategoriaService = doacaoCategoriaService;
             _doacaoRepo = doacaoRepo;
+            _enderecoRepo = enderecoRepo;
+            _usuarioRepo = usuarioRepo;
         }
 
         [HttpPost]
@@ -41,6 +53,13 @@ namespace Api.AppDoar.Controllers.doacao
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
+
+                if (doacaoDto.TipoEntrega == "retirada")
+                {
+                    var usuario = _usuarioRepo.GetById(doacaoDto.DoadorId);
+                    if (string.IsNullOrEmpty(usuario?.logradouro))
+                        return BadRequest("Usuário não possui endereço cadastrado");
+                }
 
                 var itensComArquivos = doacaoDto.Itens.Select(item =>
                     (new ItemDoacaoDto
@@ -83,7 +102,7 @@ namespace Api.AppDoar.Controllers.doacao
         }
 
         [HttpGet("instituicao/{instituicaoId}")]
-        public IActionResult GetDoacoesPorInstituicao(int instituicaoId, [FromQuery] string status = "pendente")
+        public IActionResult GetDoacoesPorInstituicao(int instituicaoId, [FromQuery] StatusDoacao status = StatusDoacao.pendente)
         {
             try
             {
@@ -110,21 +129,40 @@ namespace Api.AppDoar.Controllers.doacao
             }
         }
 
-        [HttpPatch("{id}/status")]
-        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        [HttpPatch("{id}/status-pedido")]
+        public IActionResult AtualizarStatusPedido(int id, [FromBody] AtualizarStatusConfirmacaoDto dto)
         {
             try
             {
-                var success = _doacaoRepo.UpdateStatus(id, dto.Status);
-                if (!success) return NotFound();
+                var sucesso = _doacaoRepo.AtualizarStatusPedido(id, dto.status);
+                if (!sucesso) return NotFound();
 
-                return NoContent();
+                var doacaoAtualizada = _doacaoRepo.GetById(id);
+                return Ok(doacaoAtualizada);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao atualizar status: {ex.Message}");
+                return StatusCode(500, $"Erro ao atualizar status do pedido: {ex.Message}");
             }
         }
+
+        [HttpPatch("{id}/status-entrega")]
+        public IActionResult AtualizarStatusEntrega(int id, [FromBody] AtualizarStatusEntregaDto dto)
+        {
+            try
+            {
+                var sucesso = _doacaoRepo.AtualizarStatusEntrega(id, dto.status_entrega);
+                if (!sucesso) return NotFound();
+
+                var doacaoAtualizada = _doacaoRepo.GetById(id);
+                return Ok(doacaoAtualizada);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao atualizar status de entrega: {ex.Message}");
+            }
+        }
+
 
         [HttpGet("{id}/imagens")]
         public IActionResult GetImagensDoacao(int id)

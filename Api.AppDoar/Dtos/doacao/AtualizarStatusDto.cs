@@ -1,10 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Api.AppDoar.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace Api.AppDoar.Dtos.doacao
 {
-    public class AtualizarStatusDto
+    public class AtualizarStatusConfirmacaoDto
     {
         [Required]
-        public string Status { get; set; }
+        public StatusDoacao status { get; set; }
     }
+
+    public class AtualizarStatusEntregaDto
+    {
+        [Required]
+        public StatusEntrega status_entrega { get; set; }
+    }
+
 }

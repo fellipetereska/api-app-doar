@@ -66,11 +66,18 @@ namespace Api.AppDoar.Repositories.doador
                 new { UsuarioId = usuarioId });
         }
 
-        public Endereco? GetPrincipalByUsuario(int usuarioId)
+        public Endereco GetPrincipalByUsuario(int usuarioId)
         {
-            return _conn.QueryFirstOrDefault<Endereco>(
-                "SELECT * FROM endereco WHERE usuario_id = @UsuarioId AND principal = true LIMIT 1",
-                new { UsuarioId = usuarioId });
+            try
+            {
+                return _conn.QueryFirstOrDefault<Endereco>(
+                    "SELECT * FROM endereco WHERE usuario_id = @UsuarioId AND principal = true",
+                    new { UsuarioId = usuarioId });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar endereço principal: {ex.Message}");
+            }
         }
     }
 }

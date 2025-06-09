@@ -1,9 +1,11 @@
-﻿using Api.AppDoar.Classes.doacao;
-using Api.AppDoar.Classes.doador;
+﻿using Api.AppDoar.Classes.doador;
 using Api.AppDoar.Classes.instituicao;
 using Api.AppDoar.Dtos.doacao;
+using Api.AppDoar.Enum;
+using Api.AppDoar.Repositories;
 using Api.AppDoar.Repositories.doacao;
 using Api.AppDoar.Repositories.doador;
+using Api.AppDoar.Repositories.instituicao;
 using System.Transactions;
 
 namespace Api.AppDoar.Services.doacao
@@ -12,6 +14,8 @@ namespace Api.AppDoar.Services.doacao
     {
         private readonly DoacaoRepositorio _doacaoRepo;
         private readonly EnderecoRepositorio _enderecoRepo;
+        private readonly UsuarioRepositorio _usuarioRepo;
+        private readonly InstituicaoRepositorio _instituicaoRepo;
         private readonly DoacaoCategoriaService _categoriaService;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
@@ -19,12 +23,16 @@ namespace Api.AppDoar.Services.doacao
         public DoacaoService(
             DoacaoRepositorio doacaoRepo,
             EnderecoRepositorio enderecoRepo,
+            UsuarioRepositorio usuarioRepo,
+            InstituicaoRepositorio instituicaoRepositorio,
             DoacaoCategoriaService categoriaService,
             IWebHostEnvironment env,
             IConfiguration config)
         {
             _doacaoRepo = doacaoRepo;
             _enderecoRepo = enderecoRepo;
+            _usuarioRepo = usuarioRepo;
+            _instituicaoRepo = instituicaoRepositorio;
             _categoriaService = categoriaService;
             _env = env;
             _config = config;
@@ -34,7 +42,7 @@ namespace Api.AppDoar.Services.doacao
         CriarDoacaoDto dto,
         List<(ItemDoacaoDto item, List<IFormFile> imagens)> itensComArquivos,
         int instituicaoId,
-        string baseUrl) 
+        string baseUrl)
         {
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -51,14 +59,15 @@ namespace Api.AppDoar.Services.doacao
 
                 var doacao = new Doacao
                 {
-                    doador_id = dto.DoadorId,
+                    usuario_id = dto.DoadorId,
                     instituicao_id = dto.InstituicaoId,
                     horario_retirada = dto.HorarioRetirada,
                     endereco = enderecoCompleto,
                     tipo_entrega = dto.TipoEntrega,
-                    usuario_id = dto.DoadorId,
-                    status = "pendente",
-                    created_at = DateTime.Now
+                    status = StatusDoacao.pendente.ToString(),
+                    status_entrega = StatusEntrega.pendente.ToString(),
+                    data_status = DateTime.Now,
+                    data_entrega = DateTime.Now
                 };
 
                 var doacaoId = (int)_doacaoRepo.Create(doacao);
@@ -75,7 +84,7 @@ namespace Api.AppDoar.Services.doacao
                         descricao = item.Descricao ?? string.Empty,
                         estado = item.Estado,
                         quantidade = item.Quantidade,
-                        subcategoria_idsubcategoria = item.SubcategoriaId
+                        subcategoria_id = item.SubcategoriaId 
                     };
 
                     var itemId = (int)_doacaoRepo.CreateItemDoacao(doacaoItem);
@@ -160,50 +169,15 @@ namespace Api.AppDoar.Services.doacao
         {
             if (dto.TipoEntrega == "retirada")
             {
-                if (dto.EnderecoId.HasValue)
-                {
-                    var endereco = _enderecoRepo.GetById(dto.EnderecoId.Value);
-                    if (endereco == null || endereco.usuario_id != dto.DoadorId)
-                        throw new Exception("Endereço inválido");
+                var usuario = _usuarioRepo.GetById(dto.DoadorId);
+                if (usuario == null) throw new Exception("Usuário não encontrado");
 
-                    return FormatarEndereco(endereco);
-                }
-
-                if (dto.NovoEndereco != null)
-                {
-                    if (string.IsNullOrWhiteSpace(dto.NovoEndereco.Logradouro) ||
-                        string.IsNullOrWhiteSpace(dto.NovoEndereco.Numero) ||
-                        string.IsNullOrWhiteSpace(dto.NovoEndereco.Bairro) ||
-                        string.IsNullOrWhiteSpace(dto.NovoEndereco.Cidade) ||
-                        string.IsNullOrWhiteSpace(dto.NovoEndereco.Uf) ||
-                        string.IsNullOrWhiteSpace(dto.NovoEndereco.Cep))
-                    {
-                        throw new Exception("Todos os campos obrigatórios do endereço devem ser preenchidos");
-                    }
-
-                    var novoEndereco = new Endereco
-                    {
-                        usuario_id = dto.DoadorId,
-                        logradouro = dto.NovoEndereco.Logradouro,
-                        numero = dto.NovoEndereco.Numero,
-                        complemento = dto.NovoEndereco.Complemento,
-                        bairro = dto.NovoEndereco.Bairro,
-                        cidade = dto.NovoEndereco.Cidade,
-                        uf = dto.NovoEndereco.Uf,
-                        cep = dto.NovoEndereco.Cep,
-                        principal = dto.NovoEndereco.Principal
-                    };
-
-                    _enderecoRepo.Create(novoEndereco);
-                    return FormatarEndereco(novoEndereco);
-                }
-
-                throw new Exception("Endereço é obrigatório para retirada");
+                return $"{usuario.logradouro}, {usuario.numero}, {usuario.bairro}, {usuario.cidade}-{usuario.uf}";
             }
-            else
+            else 
             {
-                var instituicao = _doacaoRepo.GetInstituicaoById(dto.InstituicaoId);
-                return FormatarEndereco(instituicao);
+                var instituicao = _instituicaoRepo.GetById(dto.InstituicaoId);
+                return $"{instituicao.logradouro}, {instituicao.numero}, {instituicao.bairro}, {instituicao.cidade}-{instituicao.uf}";
             }
         }
 
@@ -236,11 +210,11 @@ namespace Api.AppDoar.Services.doacao
             try
             {
                 var query = @"
-                    SELECT COUNT(1) 
-                    FROM subcategoria s
-                    JOIN categoria c ON s.categoria_id = c.id
-                    WHERE s.idsubcategoria = @SubcategoriaId
-                    AND c.instituicao_id = @InstituicaoId";
+            SELECT COUNT(1) 
+            FROM subcategoria s
+            JOIN categoria c ON s.categoria_id = c.id
+            WHERE s.id = @SubcategoriaId
+            AND c.instituicao_id = @InstituicaoId";
 
                 var count = _doacaoRepo.ExecuteScalar<int>(query,
                     new { SubcategoriaId = subcategoriaId, InstituicaoId = instituicaoId });
@@ -256,11 +230,6 @@ namespace Api.AppDoar.Services.doacao
         private string FormatarEndereco(Endereco endereco)
         {
             return $"{endereco.logradouro}, {endereco.numero}, {endereco.bairro}, {endereco.cidade}-{endereco.uf}";
-        }
-
-        private string FormatarEndereco(Instituicao instituicao)
-        {
-            return $"{instituicao.logradouro}, {instituicao.numero}, {instituicao.bairro}, {instituicao.cidade}-{instituicao.uf}";
         }
     }
 }

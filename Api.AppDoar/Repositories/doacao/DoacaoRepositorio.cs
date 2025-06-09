@@ -1,6 +1,6 @@
 ﻿using Api.AppDoar.Classes;
-using Api.AppDoar.Classes.doacao;
 using Api.AppDoar.Classes.instituicao;
+using Api.AppDoar.Enum;
 using Api.AppDoar.PersistenciaDB;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -21,8 +21,13 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+        
                 var doacaoId = conn.Insert(doacao);
                 return doacaoId;
+            }
+            catch (MySqlException ex) when (ex.Number == 1452) 
+            {
+                throw new Exception("Erro ao criar doação: Usuário ou instituição não encontrado", ex);
             }
             catch (Exception ex)
             {
@@ -68,13 +73,12 @@ namespace Api.AppDoar.Repositories.doacao
             }
         }
 
-        public IEnumerable<Doacao> GetByInstituicaoId(int instituicaoId, string status)
+        public IEnumerable<Doacao> GetByInstituicaoId(int instituicaoId, StatusDoacao status)
         {
             var sql = @"
         SELECT * FROM doacao 
         WHERE instituicao_id = @InstituicaoId 
-        AND status = @Status
-        ORDER BY created_at DESC";
+        AND status = @Status";
 
             return conn.Query<Doacao>(sql, new
             {
@@ -83,23 +87,22 @@ namespace Api.AppDoar.Repositories.doacao
             });
         }
 
-        public bool UpdateStatus(int id, string status)
+    
+
+        public bool AtualizarStatusPedido(int id, StatusDoacao novoStatus)
         {
-            var sql = @"
-        UPDATE doacao 
-        SET status = @Status, 
-            updated_at = @UpdatedAt 
-        WHERE id = @Id";
-
-            var rowsAffected = conn.Execute(sql, new
-            {
-                Id = id,
-                Status = status,
-                UpdatedAt = DateTime.Now
-            });
-
-            return rowsAffected > 0;
+            var sql = "UPDATE doacao SET status = @Status WHERE id = @Id";
+            var linhasAfetadas = conn.Execute(sql, new { Status = novoStatus.ToString(), Id = id });
+            return linhasAfetadas > 0;
         }
+
+        public bool AtualizarStatusEntrega(int id, StatusEntrega novoStatusEntrega)
+        {
+            var sql = "UPDATE doacao SET status_entrega = @StatusEntrega WHERE id = @Id";
+            var linhasAfetadas = conn.Execute(sql, new { StatusEntrega = novoStatusEntrega, Id = id });
+            return linhasAfetadas > 0;
+        }
+
 
         public void CreateImagensDoacao(IEnumerable<DoacaoImagem> imagens)
         {
