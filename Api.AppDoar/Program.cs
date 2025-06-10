@@ -1,11 +1,14 @@
+using Api.AppDoar.Repositories.assistido;
 using Api.AppDoar.Repositories.doacao;
 using Api.AppDoar.Repositories.doador;
+using Api.AppDoar.Repositories.instituicao;
 using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.AppDoar
@@ -19,11 +22,16 @@ namespace Api.AppDoar
             // Add services to the container.
             builder.Services.AddControllers();
 
+            // Defina a licença do QuestPDF
+            QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.EnableDebugging = true;
 
             // Repositórios
             builder.Services.AddScoped<DoacaoRepositorio>();
             builder.Services.AddScoped<CategoriaRepositorio>();
             builder.Services.AddScoped<EnderecoRepositorio>();
+            builder.Services.AddScoped<AssistidoRepositorio>();
+            builder.Services.AddScoped<EntregasRepositorio>();
 
             // Serviços
             builder.Services.AddScoped<DoacaoService>();

@@ -233,6 +233,13 @@ namespace Api.AppDoar.Repositories.assistido
             }
         }
 
+        public int CountListaEspera(int instituicaoId)
+        {
+            var sql = @"SELECT COUNT(*) FROM assistido WHERE instituicao_id = @instituicaoId AND status_lista_espera = 1";
+            return conn.ExecuteScalar<int>(sql, new { instituicaoId });
+        }
+
+
         public void VincularProjeto(int assistidoId, int projetoId)
         {
             try

@@ -58,7 +58,7 @@ public class CategoriaRepositorio
         try
         {
             string insertCategoria = @"
-                INSERT INTO categoria (nome, instituicao_id)
+                INSERT INTO categoria (nome, preco instituicao_id)
                 VALUES (@nome, @instituicaoId);
                 SELECT LAST_INSERT_ID();";
 

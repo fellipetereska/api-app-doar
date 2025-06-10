@@ -4,7 +4,9 @@ using Api.AppDoar.Dtos;
 using Api.AppDoar.Dtos.instituicao;
 using Api.AppDoar.Repositories.assistido;
 using Api.AppDoar.Repositories.instituicao;
+using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
 using static Api.AppDoar.Dtos.instituicao.EntregasDto;
 
 namespace Api.AppDoar.Controllers.instituicao
@@ -195,6 +197,18 @@ namespace Api.AppDoar.Controllers.instituicao
             {
                 return StatusCode(500, new { message = ex.Message });
             }
+        }
+
+        [HttpGet("gerar_termo/{entregaId}")]
+        public IActionResult GerarTermo(int entregaId)
+        {
+            var repo = new EntregasRepositorio();
+            var termo = repo.MontarTermoPorId(entregaId);
+
+            var documento = new TermoDoacaoPdf(termo);
+            var pdf = documento.GeneratePdf();
+
+            return File(pdf, "application/pdf", $"termo_doacao_{termo.NomeAssistido}.pdf");
         }
     }
 }

@@ -7,6 +7,7 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using MySql.Data.MySqlClient;
 using System.Text;
+using Api.AppDoar.Utils;
 
 namespace Api.AppDoar.Repositories.instituicao
 {
@@ -317,5 +318,85 @@ namespace Api.AppDoar.Repositories.instituicao
                 }
             }
         }
+
+        public TermoDoacaoDto MontarTermoPorId(int entregaId)
+        {
+            // Dados da entrega e assistido (tudo vem da view)
+            var entregaQuery = @"
+                SELECT 
+                    id,
+                    data AS DataEntrega,
+                    tipo_entrega AS TipoEntrega,
+                    observacao AS Observacao,
+                    instituicao_id,
+                    nome_assistido AS NomeAssistido,
+                    tipo_documento AS TipoDocumento,
+                    documento AS DocumentoAssistido,
+                    endereco_completo AS EnderecoAssistido,
+                    categoria AS Categoria,
+                    subcategoria AS Subcategoria,
+                    quantidade AS Quantidade
+                FROM vw_entregas
+                WHERE id = @EntregaId;
+            ";
+
+            var entregaDados = conn.Query(entregaQuery, new { EntregaId = entregaId }).ToList();
+
+            if (!entregaDados.Any())
+                throw new Exception("Entrega não encontrada.");
+
+            var primeiro = entregaDados.First();
+
+            // Dados da instituição (tabela normal)
+            var instituicaoQuery = @"
+                SELECT nome AS NomeInstituicao, cnpj AS CnpjInstituicao
+                FROM instituicao
+                WHERE id = @Id;
+            ";
+
+            var instituicao = conn.QueryFirstOrDefault(instituicaoQuery, new { Id = primeiro.instituicao_id });
+
+            if (instituicao == null)
+                throw new Exception("Instituição não encontrada.");
+
+            // Monta o termo
+            var termo = new TermoDoacaoDto
+            {
+                Id = primeiro.id,
+                NomeInstituicao = instituicao.NomeInstituicao,
+                CnpjInstituicao = Auxiliaries.FormatarDocumento("cnpj", instituicao.CnpjInstituicao),
+                NomeAssistido = primeiro.NomeAssistido,
+                TipoDocumento = primeiro.TipoDocumento,
+                DocumentoAssistido = Auxiliaries.FormatarDocumento("cpf", primeiro.DocumentoAssistido),
+                EnderecoAssistido = primeiro.EnderecoAssistido,
+                DataEntrega = primeiro.DataEntrega,
+                TipoEntrega = primeiro.TipoEntrega,
+                Observacao = primeiro.Observacao,
+                Itens = entregaDados.Select(d => new ItemTermoDto
+                {
+                    Categoria = d.Categoria,
+                    Subcategoria = d.Subcategoria,
+                    Quantidade = d.Quantidade
+                }).ToList()
+            };
+
+            return termo;
+        }
+
+        public int CountEntregasPorAno(int instituicaoId, int ano)
+        {
+            var sql = @"SELECT COUNT(*) FROM entregas 
+                WHERE instituicao_id = @instituicaoId AND YEAR(data) = @ano";
+            return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano });
+        }
+
+        public int CountEntregasPorMes(int instituicaoId, int ano, int mes)
+        {
+            var sql = @"SELECT COUNT(*) FROM entregas 
+                WHERE instituicao_id = @instituicaoId AND YEAR(data) = @ano AND MONTH(data) = @mes";
+            return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano, mes });
+        }
+
+
     }
 }
