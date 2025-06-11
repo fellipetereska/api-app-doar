@@ -106,20 +106,41 @@ public class CategoriaRepositorio
 
         try
         {
-            // Atualiza nome
+            // Atualiza nome da categoria
             string updateCategoria = "UPDATE categoria SET nome = @nome WHERE id = @id";
             conn.Execute(updateCategoria, new { Nome = dto.nome, id = categoriaId }, transaction);
 
-            // Apaga todas as subcategorias antigas
-            string deleteSubcategorias = "DELETE FROM subcategoria WHERE categoria_id = @categoriaId";
-            conn.Execute(deleteSubcategorias, new { categoriaId }, transaction);
+            // Busca subcategorias existentes dessa categoria
+            string selectSubcategorias = "SELECT id, nome FROM subcategoria WHERE categoria_id = @categoriaId";
+            var subcategoriasExistentes = conn.Query<(int id, string nome)>(selectSubcategorias, new { categoriaId }, transaction).ToList();
 
-            // Insere as novas
-            string insertSub = "INSERT INTO subcategoria (nome, categoria_id) VALUES (@nome, @categoriaId)";
-            foreach (var sub in dto.subcategorias)
+            var nomesNovos = dto.subcategorias.Select(n => n.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+            // Atualizar ou inserir subcategorias
+            foreach (var nome in nomesNovos)
             {
-                conn.Execute(insertSub, new { nome = sub, categoriaId }, transaction);
+                var existente = subcategoriasExistentes.FirstOrDefault(s => s.nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+                if (existente.id > 0)
+                {
+                    // Atualiza nome (opcional, caso precise renomear - aqui seria redundante)
+                    conn.Execute("UPDATE subcategoria SET nome = @nome WHERE id = @id",
+                        new { nome, id = existente.id }, transaction);
+                }
+                else
+                {
+                    // Insere nova subcategoria
+                    conn.Execute("INSERT INTO subcategoria (nome, categoria_id) VALUES (@nome, @categoriaId)",
+                        new { nome, categoriaId }, transaction);
+                }
             }
+
+            // (Opcional) Excluir subcategorias que não estão mais na lista nova e não estão vinculadas a doações
+            string excluirSubcategoriasOrfas = @"
+            DELETE FROM subcategoria 
+            WHERE categoria_id = @categoriaId
+              AND nome NOT IN @nomes
+              AND id NOT IN (SELECT DISTINCT subcategoria_id FROM doacao_item)";
+            conn.Execute(excluirSubcategoriasOrfas, new { categoriaId, nomes = nomesNovos }, transaction);
 
             transaction.Commit();
         }
@@ -129,6 +150,4 @@ public class CategoriaRepositorio
             throw;
         }
     }
-
-
 }
