@@ -13,20 +13,17 @@ namespace Api.AppDoar.Services.doacao
     {
         private readonly DoacaoRepositorio _doacaoRepo;
         private readonly DoadorRepositorio _doadorRepo;
-        private readonly DoacaoCategoriaService _categoriaService;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
 
         public DoacaoService(
             DoacaoRepositorio doacaoRepo,
             DoadorRepositorio doadorRepo,
-            DoacaoCategoriaService categoriaService,
             IWebHostEnvironment env,
             IConfiguration config)
         {
             _doacaoRepo = doacaoRepo;
             _doadorRepo = doadorRepo;
-            _categoriaService = categoriaService;
             _env = env;
             _config = config;
         }
