@@ -42,7 +42,6 @@ namespace Api.AppDoar
 
             // Serviços
             builder.Services.AddScoped<DoacaoService>();
-            builder.Services.AddScoped<DoacaoCategoriaService>();
 
             // Configuração do HttpClient para o serviço de geocodificação
             builder.Services.AddHttpClient<IGeocodificacaoService, GeocodificacaoService>(client =>

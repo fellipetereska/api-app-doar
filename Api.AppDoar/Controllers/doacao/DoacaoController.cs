@@ -20,18 +20,18 @@ namespace Api.AppDoar.Controllers.doacao
         private readonly DoacaoService _doacaoService;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
-        private readonly DoacaoCategoriaService _doacaoCategoriaService;
         private readonly DoacaoRepositorio _doacaoRepo;
         private readonly AssistidoRepositorio _assistidoRepo;
         private readonly EntregasRepositorio _entregaRepo;
         private readonly InstituicaoRepositorio _instituicaoRepo;
         private readonly ILogger<DoacaoController> _logger;
+        private readonly CategoriaRepositorio _categoriaRepositorio;
 
         public DoacaoController(
             DoacaoService doacaoService,
             IWebHostEnvironment env,
             IConfiguration config,
-            DoacaoCategoriaService doacaoCategoriaService,
+            CategoriaRepositorio categoriaRepositorio,
             DoacaoRepositorio doacaoRepo,
             AssistidoRepositorio assistidoRepo,
             EntregasRepositorio entregaRepo,
@@ -41,7 +41,7 @@ namespace Api.AppDoar.Controllers.doacao
             _doacaoService = doacaoService;
             _env = env;
             _config = config;
-            _doacaoCategoriaService = doacaoCategoriaService;
+            _categoriaRepositorio = categoriaRepositorio;
             _doacaoRepo = doacaoRepo;
             _assistidoRepo = assistidoRepo;
             _entregaRepo = entregaRepo;
@@ -108,7 +108,7 @@ namespace Api.AppDoar.Controllers.doacao
         {
             try
             {
-                var categorias = _doacaoCategoriaService.GetCategoriasComSubcategorias(instituicaoId);
+                var categorias = _categoriaRepositorio.GetCategoriasComSubcategorias(instituicaoId);
                 return Ok(categorias);
             }
             catch (Exception ex)
