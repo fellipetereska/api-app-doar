@@ -1,10 +1,12 @@
 ﻿using Api.AppDoar.Classes;
 using Api.AppDoar.Dtos;
+using Api.AppDoar.Dtos.doador;
 using Api.AppDoar.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using BCrypt.Net;
-using Microsoft.Win32;
 using Api.AppDoar.Repositories.instituicao;
+using BCrypt.Net;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Win32;
+using System.Text.Json;
 
 namespace Api.AppDoar.Controllers
 {
@@ -20,7 +22,6 @@ namespace Api.AppDoar.Controllers
 
             var objUsuario = UserRepo.BuscarPorEmail(login.email);
 
-            // Verificar usuário e senha
             if (objUsuario == null)
                 return Unauthorized(new { message = "Usuário não encontrado!" });
 
@@ -29,10 +30,8 @@ namespace Api.AppDoar.Controllers
 
             Object? res = null;
 
-            // Verificar a role do usuario
             if (objUsuario.role == "instituicao")
             {
-                // Buscar dados da Instituição
                 var objInstituicao = InstituicaoRepo.GetById(Convert.ToInt32(objUsuario.instituicao_id));
 
                 if (objInstituicao == null)
@@ -59,10 +58,9 @@ namespace Api.AppDoar.Controllers
             var novoUsuario = new Usuario
             {
                 email = register.email,
-                // Criptografar a senha
                 senha = BCrypt.Net.BCrypt.HashPassword(register.senha),
                 nome = register.nome,
-                role = "doador",
+                role = register.role ?? "doador", 
                 telefone = register.telefone,
                 cep = register.cep,
                 logradouro = register.logradouro,
@@ -74,14 +72,16 @@ namespace Api.AppDoar.Controllers
                 uf = register.uf,
                 tipo_documento = register.tipo_documento,
                 documento = register.documento,
-                tipo = register.tipo,
-                instituicao_id = register.instituicao_id > 0 ? register.instituicao_id : null,
-                status = 1
+                instituicao_id = null, 
+                status = 1 
             };
+
 
             try
             {
                 var objUsuario = userRepo.Create(novoUsuario);
+                Console.WriteLine($"Dados recebidos: {JsonSerializer.Serialize(register)}");
+
                 return Ok(new { usuario = objUsuario });
             }
             catch (Exception ex)
@@ -112,6 +112,43 @@ namespace Api.AppDoar.Controllers
             }
         }
 
+        [HttpPut("doador/{doadorId}")]
+        public IActionResult EditarDoador(int doadorId, [FromBody] UsuarioUpdateDto usuarioUpdate)
+        {
+            var userRepo = new UsuarioRepositorio();
+            var usuarioExistente = userRepo.GetById(doadorId);
+
+            try
+            {
+                if (usuarioExistente == null)
+                    return NotFound(new { message = "Usuário não encontrado." });
+
+                var usuarioParaAtualizar = new Usuario
+                {
+                    id = doadorId,
+                    nome = usuarioUpdate.nome,
+                    email = usuarioUpdate.email,
+                    telefone = usuarioUpdate.telefone,
+                    senha = usuarioExistente.senha 
+                };
+
+                if (!string.IsNullOrEmpty(usuarioUpdate.senhaAtual) && !string.IsNullOrEmpty(usuarioUpdate.novaSenha))
+                {
+                    if (!BCrypt.Net.BCrypt.Verify(usuarioUpdate.senhaAtual, usuarioExistente.senha))
+                        return BadRequest(new { message = "Senha atual incorreta." });
+
+                    usuarioParaAtualizar.senha = BCrypt.Net.BCrypt.HashPassword(usuarioUpdate.novaSenha);
+                }
+
+                userRepo.UpdateDoador(usuarioParaAtualizar);
+                return Ok(new { message = "Usuário atualizado com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         private string GerarToken(Usuario usuario)
         {
             var token = JwtHelper.GenerateToken(usuario);
@@ -131,6 +168,42 @@ namespace Api.AppDoar.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetUsuarioById(int id)
+        {
+            try
+            {
+                var usuarioRepo = new UsuarioRepositorio();
+                var usuario = usuarioRepo.GetByIdComEndereco(id); 
+
+                if (usuario == null)
+                    return NotFound(new { message = "Usuário não encontrado" });
+
+                return Ok(new
+                {
+                    usuario.id,
+                    usuario.nome,
+                    usuario.email,
+                    usuario.telefone,
+                    usuario.role,
+                    endereco = new
+                    {
+                        usuario.logradouro,
+                        usuario.numero,
+                        usuario.complemento,
+                        usuario.bairro,
+                        usuario.cidade,
+                        usuario.uf,
+                        usuario.cep
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao obter usuário: {ex.Message}" });
             }
         }
 

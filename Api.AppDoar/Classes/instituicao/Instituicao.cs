@@ -45,5 +45,8 @@ namespace Api.AppDoar.Classes.instituicao
         public decimal latitude { get; set; }
 
         public decimal longitude { get; set; }
+
+        public string? logo_path { get; set; } 
+
     }
 }

@@ -333,10 +333,26 @@ namespace Api.AppDoar.Repositories.doacao
             }
         }
 
-        public long CreateItemDoacao(DoacaoItem item)
+        public long CreateItemDoacao(DoacaoItem item, int instituicaoId)
         {
             try
             {
+                var categoriaId = conn.QueryFirstOrDefault<int?>(
+                    @"SELECT s.categoria_id 
+              FROM subcategoria s
+              JOIN categoria c ON s.categoria_id = c.id
+              WHERE s.id = @SubcategoriaId AND c.instituicao_id = @InstituicaoId",
+                    new
+                    {
+                        SubcategoriaId = item.subcategoria_id,
+                        InstituicaoId = instituicaoId
+                    });
+
+                if (!categoriaId.HasValue)
+                    throw new Exception($"Subcategoria {item.subcategoria_id} não encontrada");
+
+                item.categoria_id = categoriaId.Value;
+
                 return conn.Insert(item);
             }
             catch (Exception ex)
@@ -382,6 +398,7 @@ namespace Api.AppDoar.Repositories.doacao
                 WHERE instituicao_id = @instituicaoId AND YEAR(data_status) = @ano AND MONTH(data_status) = @mes";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano, mes });
         }
+
 
 
         public IEnumerable<Doacao> GetAll() => throw new NotImplementedException();

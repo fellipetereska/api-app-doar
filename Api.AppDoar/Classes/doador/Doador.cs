@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.AppDoar.Classes.doador
 {
-    [Table("doador")]
+    [Table("usuario")]
     public class Doador
     {
         [ExplicitKey]
@@ -14,7 +14,6 @@ namespace Api.AppDoar.Classes.doador
 
         public string telefone { get; set; } = string.Empty;
 
-        [Required]
         public string endereco { get; set; } = string.Empty;
 
         [Required]

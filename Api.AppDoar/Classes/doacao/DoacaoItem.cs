@@ -25,6 +25,8 @@ namespace Api.AppDoar.Classes.doacao
         public int quantidade { get; set; }
 
         [Required]
-        public int subcategoria_idsubcategoria { get; set; }
+        public int? subcategoria_id { get; set; }
+        public int categoria_id { get; set; }
+
     }
 }

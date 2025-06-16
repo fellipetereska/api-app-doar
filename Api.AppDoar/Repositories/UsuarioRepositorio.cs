@@ -70,9 +70,50 @@ namespace Api.AppDoar.Repositories
             }
         }
 
+        public void UpdateDoador(Usuario pUsuario)
+        {
+            try
+            {
+                var usuarioAtual = conn.Get<Usuario>(pUsuario.id);
+                if (usuarioAtual == null)
+                    throw new Exception("Usuário não encontrado");
+
+                usuarioAtual.nome = pUsuario.nome ?? usuarioAtual.nome;
+                usuarioAtual.email = pUsuario.email ?? usuarioAtual.email;
+                usuarioAtual.telefone = pUsuario.telefone ?? usuarioAtual.telefone;
+                usuarioAtual.senha = pUsuario.senha ?? usuarioAtual.senha;
+
+                conn.Update(usuarioAtual);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao atualizar usuário: {ex.Message}");
+            }
+        }
+
         public void UpdateStatus(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public Usuario? GetByIdComEndereco(int id)
+        {
+            try
+            {
+                string query = @"
+            SELECT 
+                id, nome, email, telefone, role,
+                logradouro, numero, complemento, 
+                bairro, cidade, uf, cep
+            FROM usuario 
+            WHERE id = @Id";
+
+                return conn.QueryFirstOrDefault<Usuario>(query, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar usuário com endereço: {ex.Message}");
+            }
         }
     }
 }

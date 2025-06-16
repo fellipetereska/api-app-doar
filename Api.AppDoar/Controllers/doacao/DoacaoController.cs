@@ -7,6 +7,7 @@ using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -23,6 +24,8 @@ namespace Api.AppDoar.Controllers.doacao
         private readonly DoacaoRepositorio _doacaoRepo;
         private readonly AssistidoRepositorio _assistidoRepo;
         private readonly EntregasRepositorio _entregaRepo;
+        private readonly InstituicaoRepositorio _instituicaoRepo;
+        private readonly ILogger<DoacaoController> _logger;
 
         public DoacaoController(
             DoacaoService doacaoService,
@@ -31,7 +34,9 @@ namespace Api.AppDoar.Controllers.doacao
             DoacaoCategoriaService doacaoCategoriaService,
             DoacaoRepositorio doacaoRepo,
             AssistidoRepositorio assistidoRepo,
-            EntregasRepositorio entregaRepo)
+            EntregasRepositorio entregaRepo,
+            InstituicaoRepositorio instituicaoRepo,
+            ILogger<DoacaoController> logger)
         {
             _doacaoService = doacaoService;
             _env = env;
@@ -40,8 +45,10 @@ namespace Api.AppDoar.Controllers.doacao
             _doacaoRepo = doacaoRepo;
             _assistidoRepo = assistidoRepo;
             _entregaRepo = entregaRepo;
-        }
+            _instituicaoRepo = instituicaoRepo;
+            _logger = logger;
 
+        }
 
         [HttpPost]
         [Consumes("multipart/form-data")]
@@ -53,15 +60,19 @@ namespace Api.AppDoar.Controllers.doacao
                     return BadRequest(ModelState);
 
                 var itensComArquivos = doacaoDto.Itens.Select(item =>
-                    (new ItemDoacaoDto
+                {
+                    var itemDto = new ItemDoacaoDto
                     {
                         Nome = item.Nome,
                         Descricao = item.Descricao,
                         Estado = item.Estado,
                         Quantidade = item.Quantidade,
-                        SubcategoriaId = item.SubcategoriaId
-                    },
-                    item.ImagensItem?.ToList() ?? new List<IFormFile>())).ToList();
+                        SubcategoriaId = item.SubcategoriaId,
+                        ImagensItem = item.ImagensItem
+                    };
+
+                    return (itemDto, item.ImagensItem ?? new List<IFormFile>());
+                }).ToList();
 
                 var baseUrl = _config["BaseUrl"] ?? $"{Request.Scheme}://{Request.Host}";
                 var doacaoId = await _doacaoService.CriarDoacaoCompleta(
@@ -147,20 +158,103 @@ namespace Api.AppDoar.Controllers.doacao
             }
         }
 
+        /// *** ROTA SEM SCRIPT PYTHON
+        //[HttpPatch("{id}/status")]
+        //public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        //{
+        //    try
+        //    {
+        //        var success = _doacaoRepo.UpdateStatus(id, dto.Status);
+        //        if (!success) return NotFound();
+
+        //        return NoContent();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
+
 
         [HttpPatch("{id}/status")]
-        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
         {
             try
             {
-                var success = _doacaoRepo.UpdateStatus(id, dto.Status);
-                if (!success) return NotFound();
+                if (dto == null || string.IsNullOrEmpty(dto.Status))
+                {
+                    return BadRequest(new { message = "Status é obrigatório" });
+                }
 
-                return NoContent();
+                var doacao = _doacaoRepo.GetById(id);
+                if (doacao == null)
+                {
+                    return NotFound(new { message = "Doação não encontrada" });
+                }
+
+                var updateSuccess = _doacaoRepo.UpdateStatus(id, dto.Status);
+                if (!updateSuccess)
+                {
+                    _logger.LogError($"Falha ao atualizar status da doação {id}");
+                    return StatusCode(500, new { message = "Falha ao atualizar status no banco de dados" });
+                }
+
+                if (dto.Status.Equals("Aceita", StringComparison.OrdinalIgnoreCase))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var instituicao = _instituicaoRepo.GetById(doacao.instituicao_id.Value);
+                            if (instituicao != null)
+                            {
+                                var mensagem = $"Olá! Informamos que sua doação foi {dto.Status.ToLower()} pela nossa instituição ({instituicao.nome}). Agradecemos imensamente o seu apoio.\n\nCaso você tenha selecionado a opção de retirada da doação, entraremos em contato em breve para agendar.\n\n*Mensagem automática*";
+
+                                await EnviarMensagemWhatsApp("5543991052073", mensagem);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Erro no envio WhatsApp para doação {id}");
+                        }
+                    });
+                }
+
+                return Ok(new { message = "Status atualizado com sucesso" });
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                _logger.LogError(ex, $"Erro ao atualizar status da doação {id}");
+                return StatusCode(500, new { message = "Erro interno no servidor" });
+            }
+        }
+        private async Task EnviarMensagemWhatsApp(string numero, string mensagem)
+        {
+            var scriptPath = Path.Combine(Directory.GetCurrentDirectory(),
+                                       "Automation", "Whatsapp", "bot.py");
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "python",
+                Arguments = $"\"{scriptPath}\" \"{numero}\" \"{mensagem}\"",
+                WorkingDirectory = Path.GetDirectoryName(scriptPath),
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = new Process { StartInfo = psi })
+            {
+                process.Start();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    var error = await process.StandardError.ReadToEndAsync();
+                    throw new Exception($"Erro no envio WhatsApp: {error}");
+                }
             }
         }
 

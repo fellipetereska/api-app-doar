@@ -6,6 +6,7 @@ namespace Api.AppDoar.Dtos.instituicao
     {
         public CadastroUsuarioDto usuario { get; set; }
         public Instituicao instituicao { get; set; }
+
     }
 
 }

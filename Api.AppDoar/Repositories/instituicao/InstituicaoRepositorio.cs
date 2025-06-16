@@ -21,8 +21,9 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public long Create(Instituicao pInstituicao)
         {
-            return conn.Insert<Instituicao>(pInstituicao);
+            return conn.Insert(pInstituicao);
         }
+
 
         public void Delete(int id)
         {
@@ -31,23 +32,26 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public IEnumerable<Instituicao> GetAll()
         {
-            throw new NotImplementedException();
+            try
+            {
+                string query = "SELECT * FROM instituicao";
+                return conn.Query<Instituicao>(query);
+            }
+            catch (MySqlException ex)
+            {
+                throw new Exception($"Erro no banco ao buscar instituições: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro inesperado: {ex.Message}");
+            }
         }
 
         public Instituicao? GetById(int id)
         {
-            try
-            {
-                return conn.QueryFirstOrDefault<Instituicao>("SELECT * FROM instituicao WHERE id = @Id", new { Id = id });
-            }
-            catch (MySqlException ex)
-            {
-                throw new Exception($"Erro no banco de dados. Satatus: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro ao buscar instituição: {ex.Message}");
-            }
+            return conn.QueryFirstOrDefault<Instituicao>(
+                "SELECT * FROM instituicao WHERE id = @Id",
+                new { Id = id });
         }
 
         public void Update(Instituicao pInstituicao)
@@ -59,5 +63,8 @@ namespace Api.AppDoar.Repositories.instituicao
         {
             throw new NotImplementedException();
         }
+
+
+
     }
 }

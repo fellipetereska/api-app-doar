@@ -1,7 +1,9 @@
+using Api.AppDoar.Repositories;
 using Api.AppDoar.Repositories.assistido;
 using Api.AppDoar.Repositories.doacao;
 using Api.AppDoar.Repositories.doador;
 using Api.AppDoar.Repositories.instituicao;
+using Api.AppDoar.Services;
 using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.StaticFiles;
@@ -10,6 +12,8 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Net;
+using System.Net.Http.Headers;
 
 namespace Api.AppDoar
 {
@@ -29,20 +33,34 @@ namespace Api.AppDoar
             // Repositórios
             builder.Services.AddScoped<DoacaoRepositorio>();
             builder.Services.AddScoped<CategoriaRepositorio>();
-            builder.Services.AddScoped<EnderecoRepositorio>();
             builder.Services.AddScoped<AssistidoRepositorio>();
             builder.Services.AddScoped<EntregasRepositorio>();
+            builder.Services.AddScoped<DoadorRepositorio>();
+            builder.Services.AddScoped<UsuarioRepositorio>();
+            builder.Services.AddScoped<InstituicaoRepositorio>();
+
 
             // Serviços
             builder.Services.AddScoped<DoacaoService>();
             builder.Services.AddScoped<DoacaoCategoriaService>();
 
+            // Configuração do HttpClient para o serviço de geocodificação
+            builder.Services.AddHttpClient<IGeocodificacaoService, GeocodificacaoService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            });
 
-            // Configuração para upload de arquivos grandes
+
             builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 52428800; // 50MB
-                options.MultipartHeadersLengthLimit = 52428800; // 50MB
+                options.MultipartBodyLengthLimit = 52428800; 
+                options.MultipartHeadersLengthLimit = 52428800; 
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -54,8 +72,6 @@ namespace Api.AppDoar
                     Version = "v1",
                     Description = "API para gerenciamento de doações"
                 });
-
-                c.OperationFilter<SwaggerFileUploadOperationFilter>();
 
                 c.CustomSchemaIds(x => x.Name);
             });
@@ -75,7 +91,6 @@ namespace Api.AppDoar
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
-
             });
 
             var app = builder.Build();
@@ -85,6 +100,13 @@ namespace Api.AppDoar
             if (!Directory.Exists(uploadsPath))
             {
                 Directory.CreateDirectory(uploadsPath);
+            }
+
+            // Criar pasta de logos se não existir
+            var logosPath = Path.Combine(uploadsPath, "logos");
+            if (!Directory.Exists(logosPath))
+            {
+                Directory.CreateDirectory(logosPath);
             }
 
             // Habilitar CORS
@@ -98,6 +120,9 @@ namespace Api.AppDoar
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
 
+            string novoHash = BCrypt.Net.BCrypt.HashPassword("1234", workFactor: 11);
+            Console.WriteLine(novoHash);
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -105,10 +130,9 @@ namespace Api.AppDoar
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("AllowAll"); 
+            app.UseCors("AllowAll");
 
-
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 
@@ -116,49 +140,4 @@ namespace Api.AppDoar
         }
     }
 
-    public class SwaggerFileUploadOperationFilter : IOperationFilter
-    {
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (context.MethodInfo.Name == "CriarDoacao")
-            {
-                operation.RequestBody.Content["multipart/form-data"].Schema = new OpenApiSchema
-                {
-                    Type = "object",
-                    Properties = new Dictionary<string, OpenApiSchema>
-                    {
-                        ["DoadorId"] = new() { Type = "integer", Format = "int32" },
-                        ["InstituicaoId"] = new() { Type = "integer", Format = "int32" },
-                        ["TipoEntrega"] = new() { Type = "string" },
-                        ["HorarioRetirada"] = new() { Type = "string" },
-                        ["EnderecoId"] = new() { Type = "integer", Format = "int32" },
-                        ["NovoEndereco.UsuarioId"] = new() { Type = "integer", Format = "int32" },
-                        ["NovoEndereco.Logradouro"] = new() { Type = "string" },
-                        ["NovoEndereco.Numero"] = new() { Type = "string" },
-                        ["NovoEndereco.Complemento"] = new() { Type = "string" },
-                        ["NovoEndereco.Bairro"] = new() { Type = "string" },
-                        ["NovoEndereco.Cidade"] = new() { Type = "string" },
-                        ["NovoEndereco.Uf"] = new() { Type = "string" },
-                        ["NovoEndereco.Cep"] = new() { Type = "string" },
-                        ["NovoEndereco.Principal"] = new() { Type = "boolean" },
-                        ["Itens[0].Nome"] = new() { Type = "string" },
-                        ["Itens[0].Descricao"] = new() { Type = "string" },
-                        ["Itens[0].Estado"] = new() { Type = "string" },
-                        ["Itens[0].Quantidade"] = new() { Type = "integer", Format = "int32" },
-                        ["Itens[0].SubcategoriaId"] = new() { Type = "integer", Format = "int32" },
-                        ["Itens[0].ImagensItem"] = new()
-                        {
-                            Type = "array",
-                            Items = new OpenApiSchema
-                            {
-                                Type = "string",
-                                Format = "binary"
-                            }
-                        }
-                    },
-                    Required = new HashSet<string> { "DoadorId", "InstituicaoId", "TipoEntrega" }
-                };
-            }
-        }
-    }
 }

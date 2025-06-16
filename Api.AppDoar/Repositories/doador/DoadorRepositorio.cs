@@ -39,7 +39,7 @@ namespace Api.AppDoar.Repositories.doador
         {
             try
             {
-                return conn.QueryFirstOrDefault<Doador>("SELECT * FROM doador WHERE id = @Id", new { Id = id });
+                return conn.QueryFirstOrDefault<Doador>("SELECT * FROM usuario WHERE id = @Id AND role = 'doador'", new { Id = id });
             }
             catch (MySqlException ex)
             {
@@ -81,6 +81,49 @@ namespace Api.AppDoar.Repositories.doador
             {
                 transaction.Rollback();
                 throw new Exception($"Erro ao cadastrar doador e usuário: {ex.Message}");
+            }
+        }
+
+        public Usuario GetUsuarioCompleto(int id)
+        {
+            try
+            {
+                var usuario = conn.QueryFirstOrDefault<Usuario>(
+                    "SELECT * FROM usuario WHERE id = @Id",
+                    new { Id = id });
+
+                if (usuario == null)
+                {
+                    throw new Exception("Usuário não encontrado");
+                }
+
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar usuário completo: {ex.Message}");
+            }
+        }
+
+        public bool UpdateUsuario(Usuario usuario)
+        {
+            try
+            {
+                return conn.Execute(
+                    @"UPDATE usuario SET 
+              logradouro = @logradouro,
+              numero = @numero,
+              complemento = @complemento,
+              bairro = @bairro,
+              cidade = @cidade,
+              uf = @uf,
+              cep = @cep
+            WHERE id = @id",
+                    usuario) > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao atualizar usuário: {ex.Message}");
             }
         }
 

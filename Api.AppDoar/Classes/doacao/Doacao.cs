@@ -10,9 +10,6 @@ namespace Api.AppDoar.Classes.doacao
         [ExplicitKey]
         public int id { get; set; }
 
-        [Required]
-        public int doador_id { get; set; }
-
         public int? instituicao_id { get; set; }
 
         public string horario_retirada { get; set; } = string.Empty;
@@ -28,10 +25,7 @@ namespace Api.AppDoar.Classes.doacao
         [Required]
         public int usuario_id { get; set; }
 
-        public bool status_entrega { get; set; } = false;
-
-        public DateTime? created_at { get; set; }
-        public DateTime? updated_at { get; set; }
+        public string status_entrega { get; set; } = "pendente";
 
         [Computed]
         public List<DoacaoItem> Itens { get; set; } = new List<DoacaoItem>();

@@ -1,88 +1,93 @@
-﻿using Api.AppDoar.Classes.doador;
-using Api.AppDoar.Dtos.doador;
+﻿using Api.AppDoar.Dtos.doador;
 using Api.AppDoar.Repositories.doador;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.AppDoar.Controllers.doador
+[Route("api/[controller]")]
+[ApiController]
+public class EnderecoController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class EnderecoController : ControllerBase
+    private readonly DoadorRepositorio _doadorRepo;
+
+    public EnderecoController(DoadorRepositorio doadorRepo)
     {
-        private readonly EnderecoRepositorio _enderecoRepo;
-        private readonly DoadorRepositorio _doadorRepo;
+        _doadorRepo = doadorRepo;
+    }
 
-        public EnderecoController(EnderecoRepositorio enderecoRepo, DoadorRepositorio doadorRepo)
+    [HttpGet("usuario/{usuarioId}")]
+    public IActionResult GetByUsuario(int usuarioId)
+    {
+        try
         {
-            _enderecoRepo = enderecoRepo;
-            _doadorRepo = doadorRepo;
-        }
-
-        [HttpPost]
-        public IActionResult Post([FromBody] AdicionarEnderecoDto dto)
-        {
-            try
+            var usuario = _doadorRepo.GetUsuarioCompleto(usuarioId);
+            if (usuario == null || usuario.role != "doador")
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var doador = _doadorRepo.GetById(dto.UsuarioId);
-                if (doador == null)
-                    return BadRequest("O usuário informado não é um doador válido");
-
-                var endereco = new Endereco
+                return NotFound(new
                 {
-                    usuario_id = dto.UsuarioId,
-                    logradouro = dto.Logradouro,
-                    numero = dto.Numero,
-                    complemento = dto.Complemento,
-                    bairro = dto.Bairro,
-                    cidade = dto.Cidade,
-                    uf = dto.Uf,
-                    cep = dto.Cep,
-                    principal = dto.Principal,
-                    latitude = dto.Latitude,
-                    longitude = dto.Longitude
-                };
+                    success = false,
+                    message = "Usuário não encontrado ou não é um doador"
+                });
+            }
 
-                var id = _enderecoRepo.Create(endereco);
-                return CreatedAtAction(nameof(GetByUsuario), new { usuarioId = dto.UsuarioId }, new { Id = id });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return StatusCode(500, $"Erro ao cadastrar endereço: {ex.Message}");
-            }
+                success = true,
+                data = new
+                {
+                    logradouro = usuario.logradouro,
+                    numero = usuario.numero,
+                    complemento = usuario.complemento,
+                    endereco = usuario.endereco,
+                    bairro = usuario.bairro,
+                    cidade = usuario.cidade,
+                    uf = usuario.uf,
+                    cep = usuario.cep
+                }
+            });
         }
-
-        [HttpGet("usuario/{usuarioId}")]
-        public IActionResult GetByUsuario(int usuarioId)
+        catch (Exception ex)
         {
-            try
+            return StatusCode(500, new
             {
-                var enderecos = _enderecoRepo.GetByUsuario(usuarioId);
-                return Ok(enderecos);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro ao buscar endereços: {ex.Message}");
-            }
+                success = false,
+                message = $"Erro ao buscar endereço: {ex.Message}"
+            });
         }
+    }
 
-        [HttpGet("usuario/{usuarioId}/principal")]
-        public IActionResult GetPrincipalByUsuario(int usuarioId)
+    [HttpPut("usuario/{usuarioId}")]
+    public IActionResult Update(int usuarioId, [FromBody] AtualizarEnderecoDto dto)
+    {
+        try
         {
-            try
-            {
-                var endereco = _enderecoRepo.GetPrincipalByUsuario(usuarioId);
-                if (endereco == null)
-                    return NotFound();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                return Ok(endereco);
-            }
-            catch (Exception ex)
+            var usuario = _doadorRepo.GetUsuarioCompleto(usuarioId);
+            if (usuario == null || usuario.role != "doador")
+                return NotFound();
+
+            usuario.logradouro = dto.Logradouro; 
+            usuario.numero = dto.Numero;
+            usuario.complemento = dto.Complemento;
+            usuario.bairro = dto.Bairro;
+            usuario.cidade = dto.Cidade;
+            usuario.uf = dto.Uf;
+            usuario.cep = dto.Cep;
+
+            var success = _doadorRepo.UpdateUsuario(usuario);
+
+            if (!success)
+                return StatusCode(500, new { message = "Erro ao atualizar endereço" });
+
+            return Ok(new
             {
-                return StatusCode(500, $"Erro ao buscar endereço principal: {ex.Message}");
-            }
+                success = true,
+                message = "Endereço atualizado com sucesso"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Erro ao atualizar endereço: {ex.Message}" });
         }
     }
 }

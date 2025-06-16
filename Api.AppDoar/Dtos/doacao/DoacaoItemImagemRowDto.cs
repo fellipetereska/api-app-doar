@@ -16,7 +16,6 @@
         public string tipo_documento { get; set; } = string.Empty;
         public string documento { get; set; } = string.Empty;
         public string telefone { get; set; } = string.Empty;
-
         public int item_id { get; set; }
         public string? item_nome { get; set; } = string.Empty;
         public string? item_descricao { get; set; } = string.Empty;
@@ -24,7 +23,6 @@
         public int item_quantidade { get; set; }
         public int categoria_id { get; set; }
         public int subcategoria_id { get; set; }
-
         public int? imagem_id { get; set; }
         public string? url_imagem { get; set; } = string.Empty;
         public int? ordem { get; set; }

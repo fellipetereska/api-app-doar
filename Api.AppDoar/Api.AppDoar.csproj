@@ -7,15 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Autommation\**" />
     <Compile Remove="Classes\NewFolder1\**" />
     <Compile Remove="Classes\NewFolder2\**" />
     <Compile Remove="Classes\NewFolder\**" />
+    <Content Remove="Autommation\**" />
     <Content Remove="Classes\NewFolder1\**" />
     <Content Remove="Classes\NewFolder2\**" />
     <Content Remove="Classes\NewFolder\**" />
+    <EmbeddedResource Remove="Autommation\**" />
     <EmbeddedResource Remove="Classes\NewFolder1\**" />
     <EmbeddedResource Remove="Classes\NewFolder2\**" />
     <EmbeddedResource Remove="Classes\NewFolder\**" />
+    <None Remove="Autommation\**" />
     <None Remove="Classes\NewFolder1\**" />
     <None Remove="Classes\NewFolder2\**" />
     <None Remove="Classes\NewFolder\**" />
