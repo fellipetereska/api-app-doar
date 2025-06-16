@@ -29,7 +29,7 @@ def enviar_mensagem(numero, mensagem, tentativas=3):
         finally:
             if bot:
                 bot.close()
-            time.sleep(2)
+            time.sleep(10)
     
     return False
 

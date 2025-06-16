@@ -159,24 +159,23 @@ namespace Api.AppDoar.Controllers.doacao
         }
 
         // Código sem Automação
-        [HttpPatch("{id}/status")]
-        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
-        {
-            try
-            {
-                var success = _doacaoRepo.UpdateStatus(id, dto.Status);
-                if (!success) return NotFound();
+        //[HttpPatch("{id}/status")]
+        //public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        //{
+        //    try
+        //    {
+        //        var success = _doacaoRepo.UpdateStatus(id, dto.Status);
+        //        if (!success) return NotFound();
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //        return NoContent();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
         // Código com Automação
-        /*
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
         {
@@ -258,7 +257,7 @@ namespace Api.AppDoar.Controllers.doacao
                 }
             }
         }
-        */
+       
 
         [HttpPost("{id}/aceitar")]
         public IActionResult AceitarDoacao(int id, [FromBody] int instituicaoId)

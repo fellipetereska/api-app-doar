@@ -1,3 +1,6 @@
-2025/06/16-09:42:23.491 4d00 Reusing MANIFEST C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\shared_proto_db/MANIFEST-000001
-2025/06/16-09:42:23.491 4d00 Recovering log #3
-2025/06/16-09:42:23.494 4d00 Reusing old log C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\shared_proto_db/000003.log 
+2025/06/16-16:28:00.795 b18 Reusing MANIFEST C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\shared_proto_db/MANIFEST-000001
+2025/06/16-16:28:00.796 b18 Recovering log #3
+2025/06/16-16:28:00.798 b18 Reusing old log C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\shared_proto_db/000003.log 
+2025/06/16-16:28:04.317 53dc Level-0 table #5: started
+2025/06/16-16:28:04.321 53dc Level-0 table #5: 115154 bytes OK
+2025/06/16-16:28:04.323 53dc Delete type=0 #3

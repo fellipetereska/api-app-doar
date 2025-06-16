@@ -1,49 +1,39 @@
-2025/06/16-09:45:05.262 1494 Reusing MANIFEST C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/06/16-09:45:05.262 1494 Recovering log #419
-2025/06/16-09:45:05.279 1494 Reusing old log C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000419.log 
-2025/06/16-09:45:06.716 6764 Level-0 table #426: started
-2025/06/16-09:45:06.723 6764 Level-0 table #426: 310250 bytes OK
-2025/06/16-09:45:06.725 6764 Delete type=0 #419
-2025/06/16-09:45:06.726 5578 Manual compaction at level-0 from '\x00\x81\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x82\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/06/16-09:45:06.728 5578 Level-0 table #428: started
-2025/06/16-09:45:06.731 5578 Level-0 table #428: 445 bytes OK
-2025/06/16-09:45:06.732 5578 Delete type=0 #425
-2025/06/16-09:45:06.733 5578 Manual compaction at level-0 from '\x00\x82\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x83\x00\x00\x00' @ 0 : 0; will stop at '\x00\x82\x00\x00\x05' @ 650638 : 0
-2025/06/16-09:45:06.733 5578 Compacting 1@0 + 1@1 files
-2025/06/16-09:45:06.744 5578 Generated table #429@0: 6644 keys, 139591 bytes
-2025/06/16-09:45:06.744 5578 Compacted 1@0 + 1@1 files => 139591 bytes
-2025/06/16-09:45:06.745 5578 compacted to: files[ 0 1 2 0 0 0 0 ]
-2025/06/16-09:45:06.745 5578 Delete type=2 #428
-2025/06/16-09:45:06.746 5578 Manual compaction at level-0 from '\x00\x82\x00\x00\x05' @ 650638 : 0 .. '\x00\x83\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/06/16-09:45:08.063 5578 Compacting 1@1 + 2@2 files
-2025/06/16-09:45:08.132 5578 Generated table #430@1: 64174 keys, 2219657 bytes
-2025/06/16-09:45:08.164 5578 Generated table #431@1: 30570 keys, 1405382 bytes
-2025/06/16-09:45:08.164 5578 Compacted 1@1 + 2@2 files => 3625039 bytes
-2025/06/16-09:45:08.165 5578 compacted to: files[ 0 0 2 0 0 0 0 ]
-2025/06/16-09:45:08.165 5578 Delete type=2 #422
-2025/06/16-09:45:08.166 5578 Delete type=2 #423
-2025/06/16-09:45:08.166 5578 Delete type=2 #426
-2025/06/16-09:45:08.166 5578 Delete type=2 #429
-2025/06/16-09:45:10.779 6764 Level-0 table #433: started
-2025/06/16-09:45:10.785 6764 Level-0 table #433: 152367 bytes OK
-2025/06/16-09:45:10.786 6764 Delete type=0 #427
-2025/06/16-09:45:10.787 1494 Manual compaction at level-0 from '\x00\x83\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x84\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/06/16-09:45:10.788 6764 Level-0 table #435: started
-2025/06/16-09:45:10.792 6764 Level-0 table #435: 512 bytes OK
-2025/06/16-09:45:10.793 6764 Delete type=0 #432
-2025/06/16-09:45:10.793 1494 Manual compaction at level-0 from '\x00\x84\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x85\x00\x00\x00' @ 0 : 0; will stop at '\x00\x84\x00\x00\x05' @ 655884 : 0
-2025/06/16-09:45:10.794 1494 Compacting 1@0 + 1@1 files
-2025/06/16-09:45:10.800 1494 Generated table #436@0: 3081 keys, 67534 bytes
-2025/06/16-09:45:10.801 1494 Compacted 1@0 + 1@1 files => 67534 bytes
-2025/06/16-09:45:10.802 1494 compacted to: files[ 0 1 2 0 0 0 0 ]
-2025/06/16-09:45:10.802 1494 Delete type=2 #435
-2025/06/16-09:45:10.803 1494 Manual compaction at level-0 from '\x00\x84\x00\x00\x05' @ 655884 : 0 .. '\x00\x85\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/06/16-09:45:12.102 6764 Compacting 1@1 + 2@2 files
-2025/06/16-09:45:12.161 6764 Generated table #437@1: 64864 keys, 2220624 bytes
-2025/06/16-09:45:12.191 6764 Generated table #438@1: 30413 keys, 1401449 bytes
-2025/06/16-09:45:12.191 6764 Compacted 1@1 + 2@2 files => 3622073 bytes
-2025/06/16-09:45:12.192 6764 compacted to: files[ 0 0 2 0 0 0 0 ]
-2025/06/16-09:45:12.192 6764 Delete type=2 #430
-2025/06/16-09:45:12.192 6764 Delete type=2 #431
-2025/06/16-09:45:12.193 6764 Delete type=2 #433
-2025/06/16-09:45:12.193 6764 Delete type=2 #436
+2025/06/16-16:29:16.201 55e8 Reusing MANIFEST C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/06/16-16:29:16.202 55e8 Recovering log #536
+2025/06/16-16:29:16.217 55e8 Reusing old log C:\Users\felip\source\repos\api-app-doar\Api.AppDoar\Automation\Whatsapp\UserData\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000536.log 
+2025/06/16-16:29:17.617 2580 Manual compaction at level-0 from '\x00\xa1\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\xa2\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/06/16-16:29:17.619 52e8 Level-0 table #543: started
+2025/06/16-16:29:17.627 52e8 Level-0 table #543: 277432 bytes OK
+2025/06/16-16:29:17.628 52e8 Delete type=0 #536
+2025/06/16-16:29:17.629 52e8 Manual compaction at level-0 from '\x00\xa2\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\xa3\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/06/16-16:29:18.809 2580 Compacting 1@1 + 2@2 files
+2025/06/16-16:29:18.866 2580 Generated table #544@1: 73998 keys, 2229066 bytes
+2025/06/16-16:29:18.905 2580 Generated table #545@1: 38956 keys, 1842865 bytes
+2025/06/16-16:29:18.905 2580 Compacted 1@1 + 2@2 files => 4071931 bytes
+2025/06/16-16:29:18.906 2580 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/06/16-16:29:18.907 2580 Delete type=2 #539
+2025/06/16-16:29:18.907 2580 Delete type=2 #540
+2025/06/16-16:29:18.907 2580 Delete type=2 #543
+2025/06/16-16:29:21.552 2580 Level-0 table #547: started
+2025/06/16-16:29:21.557 2580 Level-0 table #547: 128756 bytes OK
+2025/06/16-16:29:21.558 2580 Delete type=0 #542
+2025/06/16-16:29:21.559 52e8 Manual compaction at level-0 from '\x00\xa3\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\xa4\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/06/16-16:29:21.559 52e8 Level-0 table #549: started
+2025/06/16-16:29:21.563 52e8 Level-0 table #549: 449 bytes OK
+2025/06/16-16:29:21.565 52e8 Delete type=0 #546
+2025/06/16-16:29:21.565 2580 Manual compaction at level-0 from '\x00\xa4\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\xa5\x00\x00\x00' @ 0 : 0; will stop at '\x00\xa4\x00\x00\x05' @ 810465 : 0
+2025/06/16-16:29:21.565 2580 Compacting 1@0 + 1@1 files
+2025/06/16-16:29:21.571 2580 Generated table #550@0: 2889 keys, 65235 bytes
+2025/06/16-16:29:21.571 2580 Compacted 1@0 + 1@1 files => 65235 bytes
+2025/06/16-16:29:21.572 2580 compacted to: files[ 0 1 2 0 0 0 0 ]
+2025/06/16-16:29:21.572 2580 Manual compaction at level-0 from '\x00\xa4\x00\x00\x05' @ 810465 : 0 .. '\x00\xa5\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/06/16-16:29:22.728 55e8 Compacting 1@1 + 2@2 files
+2025/06/16-16:29:22.799 55e8 Generated table #551@1: 74295 keys, 2227783 bytes
+2025/06/16-16:29:22.836 55e8 Generated table #552@1: 39138 keys, 1862129 bytes
+2025/06/16-16:29:22.836 55e8 Compacted 1@1 + 2@2 files => 4089912 bytes
+2025/06/16-16:29:22.837 55e8 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/06/16-16:29:22.837 55e8 Delete type=2 #544
+2025/06/16-16:29:22.838 55e8 Delete type=2 #545
+2025/06/16-16:29:22.838 55e8 Delete type=2 #547
+2025/06/16-16:29:22.838 55e8 Delete type=2 #549
+2025/06/16-16:29:22.838 55e8 Delete type=2 #550
