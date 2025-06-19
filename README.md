@@ -4,12 +4,12 @@
 
 <div align="center">
 
-📍 Desenvolvido por:
+Desenvolvido por:
 
-* Felipe Ferreira — RA: 23176241-2
-* Fellipe Tereska — RA: 23233031-2
+* Felipe Ferreira 
+* Fellipe Tereska 
 
-📍 Londrina – 2025
+
 
 </div>
 
