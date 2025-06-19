@@ -71,8 +71,9 @@ O projeto **DOAR** nasceu da observacao de dificuldades enfrentadas por institui
 
 **Back-end:**
 
-* ASP.NET Core (C#)
-* Dapper / Dapper.Contrib
+* ASP.NET (C#)
+* Python (automação)
+  
 
 **Banco de Dados:**
 
