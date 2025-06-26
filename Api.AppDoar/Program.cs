@@ -8,10 +8,8 @@ using Api.AppDoar.Services.doacao;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Net;
 using System.Net.Http.Headers;
 
@@ -23,12 +21,12 @@ namespace Api.AppDoar
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddControllers();
-
-            // Defina a licença do QuestPDF
+            // Licença QuestPDF
             QuestPDF.Settings.License = LicenseType.Community;
             QuestPDF.Settings.EnableDebugging = true;
+
+            // Controllers
+            builder.Services.AddControllers();
 
             // Repositórios
             builder.Services.AddScoped<DoacaoRepositorio>();
@@ -39,11 +37,10 @@ namespace Api.AppDoar
             builder.Services.AddScoped<UsuarioRepositorio>();
             builder.Services.AddScoped<InstituicaoRepositorio>();
 
-
             // Serviços
             builder.Services.AddScoped<DoacaoService>();
 
-            // Configuração do HttpClient para o serviço de geocodificação
+            // Geocodificação
             builder.Services.AddHttpClient<IGeocodificacaoService, GeocodificacaoService>(client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -55,13 +52,14 @@ namespace Api.AppDoar
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
 
-
+            // Formulários (uploads)
             builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 52428800; 
-                options.MultipartHeadersLengthLimit = 52428800; 
+                options.MultipartBodyLengthLimit = 52428800;
+                options.MultipartHeadersLengthLimit = 52428800;
             });
 
+            // Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -75,55 +73,23 @@ namespace Api.AppDoar
                 c.CustomSchemaIds(x => x.Name);
             });
 
-            // Força o ASP.NET a sempre gerar as URLs minúsculas
+            // Roteamento e CORS
             builder.Services.AddRouting(options =>
             {
                 options.LowercaseUrls = true;
             });
 
-            // Permitindo o acesso do localhost:3000
-            builder.Services.AddCors();
+            builder.Services.AddCors(); // Configurado globalmente no app
 
-            // Forçar usar a porta 5005
-            builder.WebHost.ConfigureKestrel(serverOptions =>
+            // Kestrel na porta 5005
+            builder.WebHost.ConfigureKestrel(options =>
             {
-                serverOptions.ListenAnyIP(5005);
+                options.ListenAnyIP(5005);
             });
 
             var app = builder.Build();
 
-            // Criar pasta de uploads se não existir
-            var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
-            if (!Directory.Exists(uploadsPath))
-            {
-                Directory.CreateDirectory(uploadsPath);
-            }
-
-            // Criar pasta de logos se não existir
-            var logosPath = Path.Combine(uploadsPath, "logos");
-            if (!Directory.Exists(logosPath))
-            {
-                Directory.CreateDirectory(logosPath);
-            }
-
-            // Configurar serviço de arquivos estáticos
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(uploadsPath),
-                RequestPath = "/Uploads",
-                ContentTypeProvider = new FileExtensionContentTypeProvider()
-            });
-
-            string novoHash = BCrypt.Net.BCrypt.HashPassword("1234", workFactor: 11);
-            Console.WriteLine(novoHash);
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
+            // CORS global
             app.UseCors(policy =>
             {
                 policy.AllowAnyOrigin()
@@ -131,12 +97,34 @@ namespace Api.AppDoar
                       .AllowAnyHeader();
             });
 
-            // app.UseHttpsRedirection();
+            // Swagger disponível sempre
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            // Pasta de uploads
+            var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
+            if (!Directory.Exists(uploadsPath))
+                Directory.CreateDirectory(uploadsPath);
+
+            var logosPath = Path.Combine(uploadsPath, "logos");
+            if (!Directory.Exists(logosPath))
+                Directory.CreateDirectory(logosPath);
+
+            // Servir arquivos estáticos (imagens, PDFs, etc.)
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(uploadsPath),
+                RequestPath = "/Uploads",
+                ContentTypeProvider = new FileExtensionContentTypeProvider()
+            });
+
+            // Middleware de autorização
             app.UseAuthorization();
+
+            // Endpoints
             app.MapControllers();
 
             app.Run();
         }
     }
-
 }
