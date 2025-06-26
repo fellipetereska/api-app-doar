@@ -155,23 +155,5 @@ namespace Api.AppDoar.Controllers.instituicao
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
-        [HttpGet("teste-conexao")]
-        public IActionResult TestarConexao()
-        {
-            try
-            {
-                using var conn = new MySql.Data.MySqlClient.MySqlConnection("Server=193.203.175.155;Database=u271392345_db_doar;Uid=u271392345_admin_doar;Pwd=fte3009Aa.;");
-                conn.Open();
-                var cmd = new MySql.Data.MySqlClient.MySqlCommand("SELECT 1", conn);
-                var result = cmd.ExecuteScalar();
-                return Ok(new { conectado = true, resultado = result });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { conectado = false, erro = ex.Message });
-            }
-        }
-
     }
 }
