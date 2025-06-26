@@ -14,6 +14,7 @@ namespace Api.AppDoar.Repositories
 
         public Usuario? BuscarPorEmail(string email)
         {
+            using var conn = ConnectionDB.GetConnection();
             string query = "SELECT * FROM usuario WHERE email = @Email";
             return conn.QueryFirstOrDefault<Usuario>(query, new { Email = email });
         }
