@@ -82,15 +82,7 @@ namespace Api.AppDoar
             });
 
             // Permitindo o acesso do localhost:3000
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", policy =>
-                {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
-                });
-            });
+            builder.Services.AddCors();
 
             // Forçar usar a porta 5005
             builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -132,9 +124,14 @@ namespace Api.AppDoar
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("AllowAll");
+            app.UseCors(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 
