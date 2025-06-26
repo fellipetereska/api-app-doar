@@ -159,76 +159,77 @@ namespace Api.AppDoar.Controllers.doacao
         }
 
         // Código sem Automação
-        //[HttpPatch("{id}/status")]
-        //public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
-        //{
-        //    try
-        //    {
-        //        var success = _doacaoRepo.UpdateStatus(id, dto.Status);
-        //        if (!success) return NotFound();
-
-        //        return NoContent();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = ex.Message });
-        //    }
-        //}
-
-        // Código com Automação
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
         {
             try
             {
-                if (dto == null || string.IsNullOrEmpty(dto.Status))
-                {
-                    return BadRequest(new { message = "Status é obrigatório" });
-                }
+                var success = _doacaoRepo.UpdateStatus(id, dto.Status);
+                if (!success) return NotFound();
 
-                var doacao = _doacaoRepo.GetById(id);
-                if (doacao == null)
-                {
-                    return NotFound(new { message = "Doação não encontrada" });
-                }
-
-                var updateSuccess = _doacaoRepo.UpdateStatus(id, dto.Status);
-                if (!updateSuccess)
-                {
-                    _logger.LogError($"Falha ao atualizar status da doação {id}");
-                    return StatusCode(500, new { message = "Falha ao atualizar status no banco de dados" });
-                }
-
-                if (dto.Status.Equals("Aceita", StringComparison.OrdinalIgnoreCase))
-                {
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            var instituicao = _instituicaoRepo.GetById(doacao.instituicao_id.Value);
-                            if (instituicao != null)
-                            {
-                                var mensagem = $"Olá! Informamos que sua doação foi {dto.Status.ToLower()} pela nossa instituição ({instituicao.nome}). Agradecemos imensamente o seu apoio.\n\nCaso você tenha selecionado a opção de retirada da doação, entraremos em contato em breve para agendar.\n\n*Mensagem automática*";
-
-                                await EnviarMensagemWhatsApp("5543991052073", mensagem);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"Erro no envio WhatsApp para doação {id}");
-                        }
-                    });
-                }
-
-                return Ok(new { message = "Status atualizado com sucesso" });
-
+                return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao atualizar status da doação {id}");
-                return StatusCode(500, new { message = "Erro interno no servidor" });
+                return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        // Código com Automação
+        //[HttpPatch("{id}/status")]
+        //public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusDto dto)
+        //{
+        //    try
+        //    {
+        //        if (dto == null || string.IsNullOrEmpty(dto.Status))
+        //        {
+        //            return BadRequest(new { message = "Status é obrigatório" });
+        //        }
+
+        //        var doacao = _doacaoRepo.GetById(id);
+        //        if (doacao == null)
+        //        {
+        //            return NotFound(new { message = "Doação não encontrada" });
+        //        }
+
+        //        var updateSuccess = _doacaoRepo.UpdateStatus(id, dto.Status);
+        //        if (!updateSuccess)
+        //        {
+        //            _logger.LogError($"Falha ao atualizar status da doação {id}");
+        //            return StatusCode(500, new { message = "Falha ao atualizar status no banco de dados" });
+        //        }
+
+        //        if (dto.Status.Equals("Aceita", StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            _ = Task.Run(async () =>
+        //            {
+        //                try
+        //                {
+        //                    var instituicao = _instituicaoRepo.GetById(doacao.instituicao_id.Value);
+        //                    if (instituicao != null)
+        //                    {
+        //                        var mensagem = $"Olá! Informamos que sua doação foi {dto.Status.ToLower()} pela nossa instituição ({instituicao.nome}). Agradecemos imensamente o seu apoio.\n\nCaso você tenha selecionado a opção de retirada da doação, entraremos em contato em breve para agendar.\n\n*Mensagem automática*";
+
+        //                        await EnviarMensagemWhatsApp("5543991052073", mensagem);
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    _logger.LogError(ex, $"Erro no envio WhatsApp para doação {id}");
+        //                }
+        //            });
+        //        }
+
+        //        return Ok(new { message = "Status atualizado com sucesso" });
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Erro ao atualizar status da doação {id}");
+        //        return StatusCode(500, new { message = "Erro interno no servidor" });
+        //    }
+        //}
+
         private async Task EnviarMensagemWhatsApp(string numero, string mensagem)
         {
             var scriptPath = Path.Combine(Directory.GetCurrentDirectory(),

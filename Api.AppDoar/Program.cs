@@ -92,6 +92,12 @@ namespace Api.AppDoar
                 });
             });
 
+            // Forçar usar a porta 5005
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.ListenAnyIP(5005);
+            });
+
             var app = builder.Build();
 
             // Criar pasta de uploads se não existir
