@@ -126,7 +126,17 @@ namespace Api.AppDoar
             // Endpoints
             app.MapControllers();
 
-            app.Run();
+            try
+            {
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro crítico no app:");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+
         }
     }
 }
