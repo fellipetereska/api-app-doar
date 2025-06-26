@@ -114,9 +114,6 @@ namespace Api.AppDoar
                 Directory.CreateDirectory(logosPath);
             }
 
-            // Habilitar CORS
-            app.UseCors("CorsPolicy");
-
             // Configurar serviço de arquivos estáticos
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -137,7 +134,7 @@ namespace Api.AppDoar
 
             app.UseCors("AllowAll");
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 
