@@ -39,7 +39,6 @@ namespace Api.AppDoar
             builder.Services.AddScoped<DoadorRepositorio>();
 
             // Serviços
-            builder.Services.AddScoped<IGeocodificacaoService, GeocodificacaoService>();
             builder.Services.AddScoped<DoacaoService>();
 
 
