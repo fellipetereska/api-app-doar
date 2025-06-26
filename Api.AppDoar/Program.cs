@@ -29,17 +29,19 @@ namespace Api.AppDoar
             builder.Services.AddControllers();
 
             // Repositórios
+            // Repositórios
+            builder.Services.AddScoped<UsuarioRepositorio>();
+            builder.Services.AddScoped<InstituicaoRepositorio>();
             builder.Services.AddScoped<DoacaoRepositorio>();
             builder.Services.AddScoped<CategoriaRepositorio>();
             builder.Services.AddScoped<AssistidoRepositorio>();
             builder.Services.AddScoped<EntregasRepositorio>();
             builder.Services.AddScoped<DoadorRepositorio>();
-            builder.Services.AddScoped<UsuarioRepositorio>();
-            builder.Services.AddScoped<InstituicaoRepositorio>();
-            builder.Services.AddScoped<IGeocodificacaoService, GeocodificacaoService>();
 
             // Serviços
+            builder.Services.AddScoped<IGeocodificacaoService, GeocodificacaoService>();
             builder.Services.AddScoped<DoacaoService>();
+
 
             // Geocodificação
             builder.Services.AddHttpClient<IGeocodificacaoService, GeocodificacaoService>(client =>
