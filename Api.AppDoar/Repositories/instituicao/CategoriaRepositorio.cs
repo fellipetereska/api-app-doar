@@ -9,19 +9,17 @@ public class CategoriaRepositorio
 {
     private MySqlConnection conn;
 
-    public CategoriaRepositorio()
-    {
-        conn = ConnectionDB.GetConnection();
-    }
-
     public List<Categoria> GetAllByInstituicao(int instituicaoId)
     {
+
+        using var conn = ConnectionDB.GetConnection();
         string sql = "SELECT * FROM categoria WHERE instituicao_id = @instituicaoId";
         return conn.Query<Categoria>(sql, new { instituicaoId }).ToList();
     }
 
     public List<Subcategoria> GetSubcategoriasByCategoria(int categoriaId)
     {
+        using var conn = ConnectionDB.GetConnection();
         string sql = @"
         SELECT s.*
         FROM subcategoria s
@@ -32,6 +30,7 @@ public class CategoriaRepositorio
 
     public List<object> GetCategoriasComSubcategorias(int instituicaoId)
     {
+        using var conn = ConnectionDB.GetConnection();
         string sql = @"SELECT * FROM vw_categoria WHERE InstituicaoId = @instituicaoId";
 
         var dados = conn.Query<CategoriaComSubCategoriaDto>(sql, new { instituicaoId });
@@ -53,6 +52,7 @@ public class CategoriaRepositorio
 
     public int CriarCategoriaComSubcategorias(CategoriaDto dto)
     {
+        using var conn = ConnectionDB.GetConnection();
         using var transaction = conn.BeginTransaction();
 
         try
@@ -93,6 +93,7 @@ public class CategoriaRepositorio
 
     public void AdicionarSubcategorias(int categoriaId, List<string> novasSubcategorias)
     {
+        using var conn = ConnectionDB.GetConnection();
         string insert = "INSERT INTO subcategoria (nome, categoria_id) VALUES (@nome, @categoriaId)";
         foreach (var nome in novasSubcategorias)
         {
@@ -102,6 +103,7 @@ public class CategoriaRepositorio
 
     public void AtualizarCategoriaComSubcategorias(int categoriaId, CategoriaDto dto)
     {
+        using var conn = ConnectionDB.GetConnection();
         using var transaction = conn.BeginTransaction();
 
         try

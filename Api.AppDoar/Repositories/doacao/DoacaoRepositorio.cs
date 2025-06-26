@@ -14,15 +14,11 @@ namespace Api.AppDoar.Repositories.doacao
     {
         private MySqlConnection conn;
 
-        public DoacaoRepositorio()
-        {
-            conn = ConnectionDB.GetConnection();
-        }
-
         public long Create(Doacao doacao)
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var doacaoId = conn.Insert(doacao);
                 return doacaoId;
             }
@@ -36,6 +32,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 conn.Insert(itens);
             }
             catch (Exception ex)
@@ -48,6 +45,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Get<Doacao>(id);
             }
             catch (Exception ex)
@@ -60,6 +58,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Query<DoacaoItem>(
                     "SELECT * FROM doacao_item WHERE doacao_id = @DoacaoId",
                     new { DoacaoId = doacaoId });
@@ -74,6 +73,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var sql = new StringBuilder("SELECT * FROM vw_doacao WHERE instituicao_id = @instituicaoId");
                 if (!string.IsNullOrEmpty(status))
                 {
@@ -154,6 +154,7 @@ namespace Api.AppDoar.Repositories.doacao
 
         public IEnumerable<DoacaoComItensDto> GetDoacoesSemInstituicao()
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = "SELECT * FROM vw_doacao WHERE instituicao_id IS NULL AND status = 'pendente'";
 
             var rows = conn.Query<DoacaoItemImagemRowDto>(sql);
@@ -202,6 +203,7 @@ namespace Api.AppDoar.Repositories.doacao
         }
         public bool AceitarDoacao(int doacaoId, int instituicaoId)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"
         UPDATE doacao 
         SET status = 'aceita',
@@ -220,6 +222,7 @@ namespace Api.AppDoar.Repositories.doacao
 
         public bool UpdateStatus(int id, string status)
         {
+            using var conn = ConnectionDB.GetConnection();
             string sql;
 
             if (status == "recusada")
@@ -249,6 +252,7 @@ namespace Api.AppDoar.Repositories.doacao
 
         public bool UpdateStatusEntrega(int doacaoId, string status, List<ItemDoacaoEntregaDto> itens)
         {
+            using var conn = ConnectionDB.GetConnection();
             using var transaction = conn.BeginTransaction();
 
             try
@@ -320,6 +324,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var imagensValidas = imagens.Where(i => i.doacao_item_id > 0).ToList();
 
                 if (!imagensValidas.Any())
@@ -337,6 +342,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var categoriaId = conn.QueryFirstOrDefault<int?>(
                     @"SELECT s.categoria_id 
               FROM subcategoria s
@@ -365,6 +371,7 @@ namespace Api.AppDoar.Repositories.doacao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Query<DoacaoImagem>(
                     "SELECT * FROM doacao_imagem WHERE doacao_id = @DoacaoId ORDER BY ordem",
                     new { DoacaoId = doacaoId });
@@ -377,16 +384,19 @@ namespace Api.AppDoar.Repositories.doacao
 
         public Instituicao GetInstituicaoById(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.Get<Instituicao>(id);
         }
 
         public T ExecuteScalar<T>(string sql, object parameters = null)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.ExecuteScalar<T>(sql, parameters);
         }
 
         public int CountDoacoesRecebidasPorAno(int instituicaoId, int ano)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"SELECT COUNT(*) FROM doacao 
                 WHERE instituicao_id = @instituicaoId AND YEAR(data_status) = @ano";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano });
@@ -394,6 +404,7 @@ namespace Api.AppDoar.Repositories.doacao
 
         public int CountDoacoesRecebidasPorMes(int instituicaoId, int ano, int mes)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"SELECT COUNT(*) FROM doacao 
                 WHERE instituicao_id = @instituicaoId AND YEAR(data_status) = @ano AND MONTH(data_status) = @mes";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano, mes });

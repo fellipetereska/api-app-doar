@@ -11,22 +11,21 @@ namespace Api.AppDoar.Repositories.instituicao
     {
         private MySqlConnection conn;
 
-        public InstituicaoRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public Instituicao? BuscarPorCnpj(string cnpj)
         {
+            using var conn = ConnectionDB.GetConnection();
             string query = "SELECT * FROM instituicao WHERE cnpj = @Cnpj";
             return conn.QueryFirstOrDefault<Instituicao>(query, new { Cnpj = cnpj });
         }
 
         public long Create(Instituicao pInstituicao)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.Insert(pInstituicao);
         }
-
-
         public void Delete(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             throw new NotImplementedException();
         }
 
@@ -34,6 +33,7 @@ namespace Api.AppDoar.Repositories.instituicao
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string query = "SELECT * FROM instituicao";
                 return conn.Query<Instituicao>(query);
             }
@@ -49,6 +49,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public Instituicao? GetById(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.QueryFirstOrDefault<Instituicao>(
                 "SELECT * FROM instituicao WHERE id = @Id",
                 new { Id = id });
@@ -56,6 +57,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public void Update(Instituicao pInstituicao)
         {
+            using var conn = ConnectionDB.GetConnection();
             conn.Update<Instituicao>(pInstituicao);
         }
 
@@ -63,8 +65,5 @@ namespace Api.AppDoar.Repositories.instituicao
         {
             throw new NotImplementedException();
         }
-
-
-
     }
 }

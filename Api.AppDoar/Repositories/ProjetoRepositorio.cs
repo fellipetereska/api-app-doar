@@ -11,15 +11,15 @@ namespace Api.AppDoar.Repositories
     {
         private MySqlConnection conn;
 
-        public ProjetoRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public long Create(Projeto pProjeto)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.Insert(pProjeto);
         }
 
         public void Delete(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             var projeto = conn.Get<Projeto>(id);
             if (projeto is not null)
             {
@@ -38,6 +38,7 @@ namespace Api.AppDoar.Repositories
 
         public Projeto? GetById(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             try
             {
                 string sql = "SELECT * FROM projeto WHERE id = @id";
@@ -51,11 +52,13 @@ namespace Api.AppDoar.Repositories
 
         public void Update(Projeto pProjeto)
         {
+            using var conn = ConnectionDB.GetConnection();
             conn.Update(pProjeto);
         }
 
         public void UpdateStatus(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             var projeto = conn.Get<Projeto>(id);
             if (projeto is not null)
             {
@@ -68,6 +71,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = "SELECT * FROM projeto WHERE instituicao_id = @idInstituicao";
                 return conn.Query<Projeto>(sql, new { idInstituicao = id }).ToList();
             }

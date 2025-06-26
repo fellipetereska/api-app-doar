@@ -10,8 +10,6 @@ namespace Api.AppDoar.Repositories
     {
         private MySqlConnection conn;
 
-        public UsuarioRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public Usuario? BuscarPorEmail(string email)
         {
             using var conn = ConnectionDB.GetConnection();
@@ -21,16 +19,19 @@ namespace Api.AppDoar.Repositories
 
         public long Create(Usuario pUsuario)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.Insert<Usuario>(pUsuario);
         }
 
         public void Delete(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             throw new NotImplementedException();
         }
 
         public IEnumerable<Usuario> GetAll()
         {
+            using var conn = ConnectionDB.GetConnection();
             throw new NotImplementedException();
         }
 
@@ -38,6 +39,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = "SELECT * FROM usuario WHERE instituicao_id = @idInstituicao";
                 return conn.Query<Usuario>(sql, new { idInstituicao = id }).ToList();
             }
@@ -51,6 +53,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Get<Usuario>(id);
             }
             catch (Exception ex)
@@ -63,6 +66,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 conn.Update(pUsuario);
             }
             catch (Exception ex)
@@ -75,6 +79,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var usuarioAtual = conn.Get<Usuario>(pUsuario.id);
                 if (usuarioAtual == null)
                     throw new Exception("Usuário não encontrado");
@@ -101,6 +106,7 @@ namespace Api.AppDoar.Repositories
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string query = @"
             SELECT 
                 id, nome, email, telefone, role,

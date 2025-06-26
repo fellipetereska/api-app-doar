@@ -11,10 +11,10 @@ namespace Api.AppDoar.Repositories.instituicao
     {
         private MySqlConnection conn;
 
-        public ItensEntregaRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public long Create(ItensEntrega item)
         {
+
+            using var conn = ConnectionDB.GetConnection();
             string sql = @"
                 INSERT INTO entrega_itens 
                 (quantidade, entregas_id, estoque_id, categoria_id, subcategoria_id)
@@ -35,6 +35,8 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public void Delete(int id)
         {
+
+            using var conn = ConnectionDB.GetConnection();
             conn.Execute("DELETE FROM entrega_itens WHERE id = @id", new { id });
         }
 

@@ -11,12 +11,11 @@ namespace Api.AppDoar.Repositories.doador
     {
         private MySqlConnection conn;
 
-        public DoadorRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public long Create(Doador pDoador)
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Insert<Doador>(pDoador);
             }
             catch (Exception ex)
@@ -37,6 +36,7 @@ namespace Api.AppDoar.Repositories.doador
 
         public Doador? GetById(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             try
             {
                 return conn.QueryFirstOrDefault<Doador>("SELECT * FROM usuario WHERE id = @Id AND role = 'doador'", new { Id = id });
@@ -63,6 +63,7 @@ namespace Api.AppDoar.Repositories.doador
 
         public (Usuario usuario, Doador doador) CreateWithUsuario(Usuario usuario, Doador doador)
         {
+            using var conn = ConnectionDB.GetConnection();
             using var transaction = conn.BeginTransaction();
 
             try
@@ -88,6 +89,7 @@ namespace Api.AppDoar.Repositories.doador
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var usuario = conn.QueryFirstOrDefault<Usuario>(
                     "SELECT * FROM usuario WHERE id = @Id",
                     new { Id = id });
@@ -109,6 +111,7 @@ namespace Api.AppDoar.Repositories.doador
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Execute(
                     @"UPDATE usuario SET 
               logradouro = @logradouro,

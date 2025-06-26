@@ -15,12 +15,11 @@ namespace Api.AppDoar.Repositories.assistido
     {
         private MySqlConnection conn;
 
-        public AssistidoRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public long Create(Assistido pAssistido)
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var existe = conn.QueryFirstOrDefault<Assistido>(
                     "SELECT * FROM assistido WHERE documento = @cpf",
                     new { cpf = pAssistido.documento });
@@ -40,6 +39,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var assistido = conn.Get<Assistido>(id);
                 if (assistido != null)
                     conn.Delete(assistido);
@@ -59,6 +59,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = "SELECT * FROM assistido WHERE instituicao_id = @idInstituicao";
                 return conn.Query<Assistido>(sql, new { idInstituicao = id }).ToList();
             }
@@ -72,6 +73,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = "SELECT * FROM vw_assistido WHERE instituicao_id = @instituicaoId";
                 var rows = conn.Query<AssistidoProjetoRowDto>(sql, new { instituicaoId });
 
@@ -131,6 +133,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 return conn.Get<Assistido>(id);
             }
             catch (Exception ex)
@@ -143,6 +146,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 conn.Update(pAssistido);
             }
             catch (Exception ex)
@@ -155,6 +159,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var assistido = conn.Get<Assistido>(id);
                 if (assistido != null)
                 {
@@ -172,6 +177,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = @"SELECT * FROM vw_lista_espera WHERE id = @assistidoId";
                 return conn.Query<ItemListaEsperaDto>(sql, new { assistidoId }).ToList();
             }
@@ -186,6 +192,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = @"
                     INSERT INTO itens_espera_assistido 
                     (status, data_solicitacao, quantidade_solicitada, quantidade_atendida, observacao, subcategoria_id, categoria_id, assistido_id)
@@ -204,6 +211,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = @"
                     UPDATE itens_espera_assistido SET
                         status = @status,
@@ -224,6 +232,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = "DELETE FROM itens_espera_assistido WHERE id = @id";
                 conn.Execute(sql, new { id });
             }
@@ -235,6 +244,7 @@ namespace Api.AppDoar.Repositories.assistido
 
         public int CountListaEspera(int instituicaoId)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"SELECT COUNT(*) FROM assistido WHERE instituicao_id = @instituicaoId AND status_lista_espera = 1";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId });
         }
@@ -244,6 +254,7 @@ namespace Api.AppDoar.Repositories.assistido
         {
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 string sql = @"INSERT IGNORE INTO assistido_projeto (assistido_id, projeto_id) VALUES (@assistidoId, @projetoId)";
                 conn.Execute(sql, new { assistidoId, projetoId });
             }

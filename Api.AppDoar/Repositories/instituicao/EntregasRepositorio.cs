@@ -17,10 +17,9 @@ namespace Api.AppDoar.Repositories.instituicao
         private readonly AssistidoRepositorio AssistidoRepo = new AssistidoRepositorio();
         private readonly ItensEntregaRepositorio ItensEntregaRepo = new ItensEntregaRepositorio();
 
-        public EntregasRepositorio() { conn = ConnectionDB.GetConnection(); }
-
         public long Create(Entregas pEntidade)
         {
+            using var conn = ConnectionDB.GetConnection();
             return conn.Insert(pEntidade);
         }
 
@@ -51,18 +50,21 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public void UpdateStatus(int id)
         {
+            using var conn = ConnectionDB.GetConnection();
             string sql = "UPDATE entregas SET WHERE id = @id";
             conn.Execute(sql, new { id });
         }
 
         public void ToggleStatus(int id, string status)
         {
+            using var conn = ConnectionDB.GetConnection();
             string sql = "UPDATE entregas SET status = @status WHERE id = @id";
             conn.Execute(sql, new { id, status });
         }
 
         public IEnumerable<EntregaComItensDto> GetByInstituicao(int instituicaoId, string? status, string? tipo_entrega, int? assistidoId, DateTime? data)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = new StringBuilder(@"SELECT * FROM vw_entregas WHERE instituicao_id = @instituicaoId");
 
             if (!string.IsNullOrEmpty(status))
@@ -96,6 +98,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
             try
             {
+                using var conn = ConnectionDB.GetConnection();
                 var sqlEntrega = @"
                     INSERT INTO entregas (data, observacao, instituicao_id, assistido_id, tipo_entrega, status)
                     VALUES (@data, @observacao, @instituicao_id, @assistido_id, @tipo_entrega, @status);
@@ -241,6 +244,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public void CancelarDoacao(int entregaId)
         {
+            using var conn = ConnectionDB.GetConnection();
             using var transaction = conn.BeginTransaction();
 
             try
@@ -321,6 +325,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public TermoDoacaoDto MontarTermoPorId(int entregaId)
         {
+            using var conn = ConnectionDB.GetConnection();
             // Dados da entrega e assistido (tudo vem da view)
             var entregaQuery = @"
                 SELECT 
@@ -385,6 +390,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public int CountEntregasPorAno(int instituicaoId, int ano)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"SELECT COUNT(*) FROM entregas 
                 WHERE instituicao_id = @instituicaoId AND YEAR(data) = @ano";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano });
@@ -392,6 +398,7 @@ namespace Api.AppDoar.Repositories.instituicao
 
         public int CountEntregasPorMes(int instituicaoId, int ano, int mes)
         {
+            using var conn = ConnectionDB.GetConnection();
             var sql = @"SELECT COUNT(*) FROM entregas 
                 WHERE instituicao_id = @instituicaoId AND YEAR(data) = @ano AND MONTH(data) = @mes";
             return conn.ExecuteScalar<int>(sql, new { instituicaoId, ano, mes });
