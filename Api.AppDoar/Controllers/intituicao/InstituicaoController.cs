@@ -16,22 +16,20 @@ namespace Api.AppDoar.Controllers.instituicao
         private readonly UsuarioRepositorio _userRepo;
         private readonly InstituicaoRepositorio _instituicaoRepo;
 
-
-        public InstituicaoController(IGeocodificacaoService geocodificacaoService)
+        public InstituicaoController(
+            IGeocodificacaoService geocodificacaoService,
+            UsuarioRepositorio userRepo,
+            InstituicaoRepositorio instituicaoRepo)
         {
             _geocodificacaoService = geocodificacaoService;
-            _userRepo = new UsuarioRepositorio();
-            _instituicaoRepo = new InstituicaoRepositorio();
+            _userRepo = userRepo;
+            _instituicaoRepo = instituicaoRepo;
         }
 
         [HttpPost("registrar")]
         public async Task<IActionResult> RegistrarInstituicao([FromForm] CadastroInstituicaoDto dto, IFormFile logo)
         {
-            var userRepo = new UsuarioRepositorio();
-            var InstituicaoRepo = new InstituicaoRepositorio();
-
-            var instituicaoExiste = InstituicaoRepo.BuscarPorCnpj(dto.instituicao.cnpj);
-
+            var instituicaoExiste = _instituicaoRepo.BuscarPorCnpj(dto.instituicao.cnpj);
             if (instituicaoExiste != null)
                 return Conflict(new { message = "Instituição já existe!" });
 
@@ -40,9 +38,7 @@ namespace Api.AppDoar.Controllers.instituicao
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "logos");
                 if (!Directory.Exists(uploadsFolder))
-                {
                     Directory.CreateDirectory(uploadsFolder);
-                }
 
                 var uniqueFileName = Guid.NewGuid().ToString() + "_" + logo.FileName;
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -73,14 +69,13 @@ namespace Api.AppDoar.Controllers.instituicao
                 descricao = dto.instituicao.descricao,
                 latitude = latitude,
                 longitude = longitude,
-                logo_path = logoPath 
+                logo_path = logoPath
             };
 
             try
             {
                 var instituicaoId = _instituicaoRepo.Create(novaInstituicao);
-
-                var instituicaoCriada = _instituicaoRepo.GetById((int)instituicaoId); 
+                var instituicaoCriada = _instituicaoRepo.GetById((int)instituicaoId);
 
                 var novoUsuario = new Usuario
                 {
@@ -90,11 +85,11 @@ namespace Api.AppDoar.Controllers.instituicao
                     tipo_documento = dto.usuario.tipo_documento,
                     documento = dto.usuario.documento,
                     role = "instituicao",
-                    instituicao_id = instituicaoCriada.id, 
+                    instituicao_id = instituicaoCriada.id,
                     status = 1
                 };
 
-                var usuarioCriado = userRepo.Create(novoUsuario);
+                var usuarioCriado = _userRepo.Create(novoUsuario);
 
                 return Ok(new
                 {
@@ -106,20 +101,14 @@ namespace Api.AppDoar.Controllers.instituicao
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
         [HttpPut("{id}")]
         public IActionResult Editar(int id, [FromBody] Instituicao instituicao)
         {
-            var instituicaoRepo = new InstituicaoRepositorio();
-
-            var instituicaoExistente = instituicaoRepo.GetById(id);
+            var instituicaoExistente = _instituicaoRepo.GetById(id);
 
             try
             {
@@ -127,9 +116,8 @@ namespace Api.AppDoar.Controllers.instituicao
                     return NotFound(new { message = "Instituição não encontrada." });
 
                 instituicao.id = id;
-                instituicaoRepo.Update(instituicao);
+                _instituicaoRepo.Update(instituicao);
                 return Ok(new { message = "Instituição atualizada com sucesso." });
-
             }
             catch (Exception ex)
             {
@@ -140,11 +128,9 @@ namespace Api.AppDoar.Controllers.instituicao
         [HttpGet("{id}")]
         public IActionResult BuscarPorId(int id)
         {
-            var instituicaoRepo = new InstituicaoRepositorio();
-
-            var instituicao = instituicaoRepo.GetById(id);
             try
             {
+                var instituicao = _instituicaoRepo.GetById(id);
                 if (instituicao == null)
                     return NotFound(new { message = "Instituição não encontrada." });
 
@@ -159,11 +145,9 @@ namespace Api.AppDoar.Controllers.instituicao
         [HttpGet]
         public IActionResult ListarTodas()
         {
-            var instituicaoRepo = new InstituicaoRepositorio();
-
             try
             {
-                var instituicoes = instituicaoRepo.GetAll();
+                var instituicoes = _instituicaoRepo.GetAll();
                 return Ok(instituicoes);
             }
             catch (Exception ex)
@@ -171,6 +155,5 @@ namespace Api.AppDoar.Controllers.instituicao
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
     }
 }
