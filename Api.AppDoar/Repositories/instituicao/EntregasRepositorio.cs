@@ -94,11 +94,11 @@ namespace Api.AppDoar.Repositories.instituicao
             List<ItensEntrega> itensEntrega,
             List<ItemEntregaDto> itensEntregues)
         {
-            using var conn = ConnectionDB.GetConnection();
-            using var transaction = conn.BeginTransaction();
 
             try
             {
+                using var conn = ConnectionDB.GetConnection();
+                using var transaction = conn.BeginTransaction();
                 var sqlEntrega = @"
                     INSERT INTO entregas (data, observacao, instituicao_id, assistido_id, tipo_entrega, status)
                     VALUES (@data, @observacao, @instituicao_id, @assistido_id, @tipo_entrega, @status);
