@@ -36,6 +36,17 @@ namespace Api.AppDoar.Controllers.instituicao
         [HttpPost]
         public IActionResult Adicionar([FromBody] EntregaPostDto dto)
         {
+            Console.WriteLine("Payload recebido:");
+            Console.WriteLine($"instituicao_id: {dto.instituicao_id}");
+            Console.WriteLine($"assistido_id: {dto.assistido_id}");
+            Console.WriteLine($"tipo_entrega: {dto.tipo_entrega}");
+            Console.WriteLine($"status: {dto.status}");
+            Console.WriteLine($"itens: {dto.itens?.Count}");
+
+            // Validação rápida
+            if (dto == null || dto.itens == null || dto.itens.Count == 0)
+                return BadRequest(new { message = "Dados inválidos." });
+
             try
             {
                 var itensEntrega = dto.itens.Select(item => new ItensEntrega
