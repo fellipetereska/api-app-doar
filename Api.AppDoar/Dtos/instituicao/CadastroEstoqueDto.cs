@@ -1,4 +1,6 @@
-﻿namespace Api.AppDoar.Dtos.instituicao
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api.AppDoar.Dtos.instituicao
 {
     public class CadastroEstoqueDto
     {
@@ -7,5 +9,7 @@
         public int subcategoria_id { get; set; }
         public int quantidade { get; set; }
         public string descricao { get; set; } = string.Empty;
+        [Required]
+        public DateTime data_movimentacao { get; set; }
     }
 }

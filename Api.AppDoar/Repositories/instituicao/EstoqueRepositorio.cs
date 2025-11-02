@@ -3,13 +3,14 @@ using Dapper.Contrib.Extensions;
 using Api.AppDoar.PersistenciaDB;
 using MySql.Data.MySqlClient;
 using Api.AppDoar.Classes.instituicao;
+using System; // Adicionado
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Api.AppDoar.Repositories.instituicao
 {
     public class EstoqueRepositorio
     {
-        private MySqlConnection conn;
-
         public long Adicionar(Estoque estoque)
         {
             using var conn = ConnectionDB.GetConnection();
@@ -30,11 +31,11 @@ namespace Api.AppDoar.Repositories.instituicao
             return conn.QueryFirstOrDefault<Estoque>(sql, new { categoria_id, subcategoria_id, instituicao_id });
         }
 
-        public void AtualizarQuantidade(int id, int novaQuantidade)
+        public void AtualizarQuantidadeEData(int id, int novaQuantidade, DateTime dataEntrada)
         {
             using var conn = ConnectionDB.GetConnection();
-            string sql = "UPDATE estoque SET quantidade = @quantidade WHERE id = @id";
-            conn.Execute(sql, new { id, quantidade = novaQuantidade });
+            string sql = "UPDATE estoque SET quantidade = @quantidade, data_ultima_entrada = @dataEntrada WHERE id = @id";
+            conn.Execute(sql, new { id, quantidade = novaQuantidade, dataEntrada });
         }
 
         public Estoque? GetById(int id)
@@ -52,7 +53,8 @@ namespace Api.AppDoar.Repositories.instituicao
                     descricao = @descricao,
                     quantidade = @quantidade,
                     categoria_id = @categoria_id,
-                    subcategoria_id = @subcategoria_id
+                    subcategoria_id = @subcategoria_id,
+                    data_ultima_entrada = @data_ultima_entrada 
                 WHERE id = @id";
 
             conn.Execute(sql, item);

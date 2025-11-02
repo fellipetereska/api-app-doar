@@ -28,6 +28,7 @@ namespace Api.AppDoar.Classes.instituicao
         public int quantidade { get; set; } = 0;
 
         public string descricao { get; set; } = string.Empty;
+        public DateTime? data_ultima_entrada { get; set; }
 
     }
 }
